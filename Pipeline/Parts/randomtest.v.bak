@@ -1,0 +1,49 @@
+`timescale 1ns / 1ps
+
+module pc 
+	
+	(
+	input [15:00] pc_new
+	output reg [15:00] pc_out
+	)
+	
+	initial begin
+		pc_out <= 0;
+	end
+	
+	always @ (pc_new) begin
+		pc_out <= pc_new
+	end
+
+endmodule
+
+
+module instruction
+
+	(
+	input fetch_instruction_request
+	output fetch_instruction_response
+	)
+	
+	
+	
+	reg [15:00]instruction_memory[0:256]
+	
+	fetch_instruction_response = instruction_memory[fetch_instruction_request]
+
+	
+endmodule
+
+module fetch 
+	(
+	input pc_out
+	input fetch_instruction_response
+	output fetch_instruction_request
+	output fetch_out
+	)
+ 
+	fetch_instruction_request => pc_out
+	fetch_out => fetch_instruction_response
+	
+endmodule
+	
