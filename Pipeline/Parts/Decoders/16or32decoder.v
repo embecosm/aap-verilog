@@ -1,6 +1,7 @@
 module sixteenbitdecoder(fetchoutput, speedy_clock);
 
 // Registers //	
+
 	reg [09:00] clock_divider_counter;
 	reg opcode;
 	reg operation;
@@ -11,7 +12,6 @@ module sixteenbitdecoder(fetchoutput, speedy_clock);
 	reg [02:00] unsigned_1;
 	reg [05:00] unsigned_2;
 	reg [08:00] unsigned_3;
-	
 	
 // Inputs & Putputs //
 
@@ -45,7 +45,8 @@ module sixteenbitdecoder(fetchoutput, speedy_clock);
 			
 		end	
 		
-		else if (bit_check == 1) begin					
+		else if (bit_check == 1) begin
+			
 			
 		end							
 	end
