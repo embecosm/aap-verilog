@@ -63,67 +63,67 @@
 0011_1101 //No instruction
 0011_1110 //No instruction
 0011_1111 //No instruction
-0100_0000
-0100_0001
-0100_0010
-0100_0011
-0100_0100
-0100_0101
-0100_0110
-0100_0111
-0100_1000
-0100_1001
-0100_1010
-0100_1011
-0100_1100
-0100_1101
-0100_1110
-0100_1111
-0101_0000
-0101_0001
-0101_0010
-0101_0011
-0101_0100
-0101_0101
-0101_0110
-0101_0111
-0101_1000
-0101_1001
-0101_1010
-0101_1011
-0101_1100
-0101_1101
-0101_1110
-0101_1111
-0110_0000
-0110_0001
-0110_0010
-0110_0011
-0110_0100
-0110_0101
-0110_0110
-0110_0111
-0110_1000
-0110_1001
-0110_1010
-0110_1011
-0110_1100
-0110_1101
-0110_1110
-0110_1111
-0111_0000
-0111_0001
-0111_0010
-0111_0011
-0111_0100
-0111_0101
-0111_0110
-0111_0111
-0111_1000
-0111_1001
-0111_1010
-0111_1011
-0111_1100
-0111_1101
-0111_1110
-0111_1111
+0100_0000 //Do nothing
+0100_0001 //Unsigned Add
+0100_0010 //Unsigned subtract
+0100_0011 //Bitwise AND
+0100_0100 //Bitwise OR
+0100_0101 //Bitwise XOR
+0100_0110 //Arithmetic shift right
+0100_0111 //Logical shift left
+0100_1000 //Logical shift right
+0100_1001 //Move register to register
+0100_1010 //Unsigned add immediate
+0100_1011 //Unsigned subtract immediate
+0100_1100 //Arithmetic shift right immediate
+0100_1101 //Logical shift left immediate
+0100_1110 //Logical shift right immediate
+0100_1111 //Move immediate to register
+0101_0000 //Indexed load byte
+0101_0001 //Indexed load word
+0101_0010 //Indexed load byte with postincrement
+0101_0011 //Indexed load word with postincrement
+0101_0100 //Indexed load byte with predecrement
+0101_0101 //Indexed load word with predecrement
+0101_0110 //Indexed store byte
+0101_0111 //Indexed store word
+0101_1000 //Indexed store byte with postincrement
+0101_1001 //Indexed store word with postincrement
+0101_1010 //Indexed store byte with predecrement
+0101_1011 //No instruction
+0101_1100 //No instruction
+0101_1101 //No instruction
+0101_1110 //Indexed store word with predecrement
+0101_1111 //No instruction
+0110_0000 //Relative branch
+0110_0001 //Relative branch and link
+0110_0010 //Relative branch if equal
+0110_0011 //Relative branch if not equal
+0110_0100 //Relative branch if signed less than
+0110_0101 //Relative branch if signed greater than
+0110_0110 //Relative branch if unsigned less than 
+0110_0111 //Relative branch if unsigned greater than
+0110_1000 //Absolute jump
+0110_1001 //Absolute jump and link
+0110_1010 //Absolute jump if equal
+0110_1011 //Absolute jump if not equal
+0110_1100 //Absolute jump if signed less than
+0110_1101 //Absolute jump if signed greater than
+0110_1110 //Absolute jump if unsigned less than
+0110_1111 //Absolute jump if unsigned greater than
+0111_0000 //No instruction
+0111_0001 //No instruction
+0111_0010 //No instruction
+0111_0011 //No instruction
+0111_0100 //No instruction
+0111_0101 //No instruction
+0111_0110 //No instruction
+0111_0111 //No instruction
+0111_1000 //No instruction
+0111_1001 //No instruction
+0111_1010 //No instruction
+0111_1011 //No instruction
+0111_1100 //No instruction
+0111_1101 //No instruction
+0111_1110 //No instruction
+0111_1111 //No instruction
