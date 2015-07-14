@@ -1,0 +1,85 @@
+#! /usr/bin/vvp
+:ivl_version "0.9.6 " "(v0_9_6)";
+:vpi_time_precision + 0;
+:vpi_module "system";
+:vpi_module "v2005_math";
+:vpi_module "va_math";
+S_0x13214d0 .scope module, "registerfile" "registerfile" 2 1;
+ .timescale 0 0;
+v0x1344900_0 .net *"_s0", 7 0, L_0x1359020; 1 drivers
+v0x1358180_0 .net *"_s11", 7 0, C4<00000000>; 1 drivers
+v0x1358220_0 .net *"_s12", 7 0, L_0x1359490; 1 drivers
+v0x13582c0_0 .net *"_s17", 7 0, C4<00000000>; 1 drivers
+v0x1358360_0 .net *"_s5", 7 0, C4<00000000>; 1 drivers
+v0x1358400_0 .net *"_s6", 7 0, L_0x1359210; 1 drivers
+v0x13584e0_0 .net "clock", 0 0, C4<z>; 0 drivers
+v0x1358580 .array "data", 0 3, 7 0;
+v0x1358650_0 .net "rd1", 1 0, C4<zz>; 0 drivers
+v0x13586f0_0 .net "rd1_out", 15 0, L_0x13590f0; 1 drivers
+v0x13587f0_0 .net "rd2", 1 0, C4<zz>; 0 drivers
+v0x1358890_0 .net "rd2_out", 15 0, L_0x13592e0; 1 drivers
+v0x13589a0_0 .net "rd3", 1 0, C4<zz>; 0 drivers
+v0x1358a40_0 .net "rd3_out", 15 0, L_0x1359560; 1 drivers
+v0x1358b60_0 .net "reset", 0 0, C4<z>; 0 drivers
+v0x1358c00_0 .net "wr1", 1 0, C4<zz>; 0 drivers
+v0x1358ac0_0 .net "wr1_data", 15 0, C4<zzzzzzzzzzzzzzzz>; 0 drivers
+v0x1358d50_0 .net "wr1_enable", 0 0, C4<z>; 0 drivers
+v0x1358e70_0 .net "wr2", 1 0, C4<zz>; 0 drivers
+v0x1358ef0_0 .net "wr2_data", 15 0, C4<zzzzzzzzzzzzzzzz>; 0 drivers
+v0x1358dd0_0 .net "wr2_enable", 0 0, C4<z>; 0 drivers
+E_0x1323a70 .event posedge, v0x1358b60_0, v0x13584e0_0;
+L_0x1359020 .array/port v0x1358580, C4<zz>;
+L_0x13590f0 .concat [ 8 8 0 0], L_0x1359020, C4<00000000>;
+L_0x1359210 .array/port v0x1358580, C4<zz>;
+L_0x13592e0 .concat [ 8 8 0 0], L_0x1359210, C4<00000000>;
+L_0x1359490 .array/port v0x1358580, C4<zz>;
+L_0x1359560 .concat [ 8 8 0 0], L_0x1359490, C4<00000000>;
+    .scope S_0x13214d0;
+T_0 ;
+    %wait E_0x1323a70;
+    %load/v 8, v0x1358b60_0, 1;
+    %jmp/0xz  T_0.0, 8;
+   %ix/load 1, 0, 0;
+   %ix/load 3, 0, 0;
+   %set/av v0x1358580, 0, 8;
+   %ix/load 1, 0, 0;
+   %ix/load 3, 1, 0;
+   %set/av v0x1358580, 0, 8;
+   %ix/load 1, 0, 0;
+   %ix/load 3, 2, 0;
+   %set/av v0x1358580, 0, 8;
+   %ix/load 1, 0, 0;
+   %ix/load 3, 3, 0;
+   %set/av v0x1358580, 0, 8;
+    %jmp T_0.1;
+T_0.0 ;
+    %load/v 8, v0x1358d50_0, 1;
+    %mov 9, 0, 2;
+    %cmpi/u 8, 1, 3;
+    %jmp/0xz  T_0.2, 4;
+    %load/v 8, v0x1358ac0_0, 16;
+    %ix/getv 3, v0x1358c00_0;
+   %jmp/1 t_0, 4;
+   %ix/load 1, 0, 0;
+   %set/av v0x1358580, 8, 8;
+t_0 ;
+T_0.2 ;
+    %load/v 8, v0x1358dd0_0, 1;
+    %mov 9, 0, 2;
+    %cmpi/u 8, 1, 3;
+    %jmp/0xz  T_0.4, 4;
+    %load/v 8, v0x1358ef0_0, 16;
+    %ix/getv 3, v0x1358e70_0;
+   %jmp/1 t_1, 4;
+   %ix/load 1, 0, 0;
+   %set/av v0x1358580, 8, 8;
+t_1 ;
+T_0.4 ;
+T_0.1 ;
+    %jmp T_0;
+    .thread T_0;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "RegisterFile2.v";
