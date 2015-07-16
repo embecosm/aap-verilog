@@ -1,0 +1,380 @@
+$date
+	Thu Jul 16 09:58:55 2015
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1s
+$end
+$scope module testbench $end
+$scope module registerfile_tb $end
+$var wire 1 ! clock $end
+$var wire 6 " rd1 [5:0] $end
+$var wire 16 # rd1_out [15:0] $end
+$var wire 6 $ rd2 [5:0] $end
+$var wire 16 % rd2_out [15:0] $end
+$var wire 6 & rd3 [5:0] $end
+$var wire 16 ' rd3_out [15:0] $end
+$var wire 1 ( reset $end
+$var wire 2 ) wr1 [1:0] $end
+$var wire 16 * wr1_data [15:0] $end
+$var wire 1 + wr1_enable $end
+$var wire 2 , wr2 [1:0] $end
+$var wire 16 - wr2_data [15:0] $end
+$var wire 1 . wr2_enable $end
+$upscope $end
+$upscope $end
+$scope module testbench $end
+$scope module sixteenbbitdecoder_test $end
+$var wire 1 / bit_check $end
+$var wire 16 0 fetchoutput [15:0] $end
+$var reg 3 1 destination [2:0] $end
+$var reg 6 2 opcode [5:0] $end
+$var reg 6 3 operationnumber [5:0] $end
+$var reg 3 4 source_1 [2:0] $end
+$var reg 3 5 source_2 [2:0] $end
+$var reg 3 6 unsigned_1 [2:0] $end
+$var reg 6 7 unsigned_2 [5:0] $end
+$var reg 9 8 unsigned_3 [8:0] $end
+$upscope $end
+$upscope $end
+$scope module testbench $end
+$scope module fetch_test $end
+$var wire 16 9 fetchoutput [15:0] $end
+$var reg 16 : fetchvalue [15:0] $end
+$upscope $end
+$upscope $end
+$scope module testbench $end
+$scope module execution_test $end
+$var wire 1 ; clock $end
+$var wire 3 < destination [2:0] $end
+$var wire 6 = operationnumber [5:0] $end
+$var wire 16 > rd1_out [15:0] $end
+$var wire 16 ? rd2_out [15:0] $end
+$var wire 16 @ rd3_out [15:0] $end
+$var wire 64 A register [63:0] $end
+$var wire 3 B source_1 [2:0] $end
+$var wire 3 C source_2 [2:0] $end
+$var wire 3 D unsigned_1 [2:0] $end
+$var wire 6 E unsigned_2 [5:0] $end
+$var wire 9 F unsigned_3 [8:0] $end
+$var reg 6 G rd1 [5:0] $end
+$var reg 6 H rd2 [5:0] $end
+$var reg 6 I rd3 [5:0] $end
+$var reg 2 J wr1 [1:0] $end
+$var reg 16 K wr1_data [15:0] $end
+$var reg 1 L wr1_enable $end
+$var reg 2 M wr2 [1:0] $end
+$var reg 16 N wr2_data [15:0] $end
+$var reg 1 O wr2_enable $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+xO
+bx N
+bx M
+xL
+bx K
+bx J
+bx I
+bx H
+bx G
+b0 F
+b0 E
+b0 D
+b0 C
+b0 B
+b0xxxxxxxxxxxxxxxx A
+bx @
+bx ?
+b0z >
+b0 =
+b0 <
+z;
+b0 :
+b0 9
+b0 8
+b0 7
+b0 6
+b0 5
+b0 4
+b0 3
+b0 2
+b0 1
+b0 0
+0/
+z.
+b0x -
+bx ,
+x+
+bx *
+bx )
+0(
+bx '
+b0xx &
+bx %
+bx $
+bx #
+bx "
+0!
+$end
+#1
+b1 =
+1!
+#2
+b0 =
+0!
+#3
+b1 =
+1!
+#4
+b0 =
+0!
+#5
+b1 =
+1!
+1(
+#6
+b0 =
+0!
+#7
+b1 =
+1!
+#8
+b0 =
+0!
+#9
+b1 =
+1!
+#10
+b0 =
+0!
+#11
+b1 =
+1!
+#12
+b0 =
+0!
+#13
+b1 =
+1!
+#14
+b0 =
+0!
+#15
+b1 =
+1!
+#16
+b0 =
+0!
+#17
+b1 =
+1!
+#18
+b0 =
+0!
+#19
+b1 =
+1!
+#20
+b0 =
+0!
+#21
+b1 =
+1!
+#22
+b0 =
+0!
+#23
+b1 =
+1!
+#24
+b0 =
+0!
+#25
+b1 =
+1!
+0(
+#26
+b0 =
+0!
+#27
+b1 =
+1!
+#28
+b0 =
+0!
+#29
+b1 =
+1!
+#30
+b0 =
+0!
+#31
+b1 =
+1!
+#32
+b0 =
+0!
+#33
+b1 =
+1!
+#34
+b0 =
+0!
+#35
+b1 =
+1!
+#36
+b0 =
+0!
+#37
+b1 =
+1!
+#38
+b0 =
+0!
+#39
+b1 =
+1!
+#40
+b1 <
+b1 3
+b1010 8
+b1010 7
+b1010 F
+b10 6
+b10 E
+b10 5
+b10 D
+b1 4
+b1 C
+b1 2
+b0 =
+0!
+b1000001010 :
+b1000001010 0
+b1000001010 9
+#41
+b1 =
+1!
+#42
+b0 =
+0!
+#43
+b1 =
+1!
+#44
+b0 =
+0!
+#45
+b1 =
+1!
+#46
+b0 =
+0!
+#47
+b1 =
+1!
+#48
+b0 =
+0!
+#49
+b1 =
+1!
+#50
+b0 =
+0!
+#51
+b1 =
+1!
+#52
+b0 =
+0!
+#53
+b1 =
+1!
+#54
+b0 =
+0!
+#55
+b1 =
+1!
+#56
+b0 =
+0!
+#57
+b1 =
+1!
+#58
+b0 =
+0!
+#59
+b1 =
+1!
+#60
+b0 =
+0!
+#61
+b1 =
+1!
+#62
+b0 =
+0!
+#63
+b1 =
+1!
+#64
+b0 =
+0!
+#65
+b1 =
+1!
+#66
+b0 =
+0!
+#67
+b1 =
+1!
+#68
+b0 =
+0!
+#69
+b1 =
+1!
+#70
+b0 =
+0!
+#71
+b1 =
+1!
+#72
+b0 =
+0!
+#73
+b1 =
+1!
+#74
+b0 =
+0!
+#75
+b1 =
+1!
+#76
+b0 =
+0!
+#77
+b1 =
+1!
+#78
+b0 =
+0!
+#79
+b1 =
+1!
+#80
+b0 =
+0!
