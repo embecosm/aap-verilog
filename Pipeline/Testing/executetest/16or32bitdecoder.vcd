@@ -1,0 +1,463 @@
+$date
+	Wed Jul 15 13:22:19 2015
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1s
+$end
+$scope module sixteenbitdecoder_tb $end
+$scope module sixteenbbitdecoder_test $end
+$var wire 1 ! bit_check $end
+$var wire 16 " fetchoutput [15:0] $end
+$var reg 3 # destination [2:0] $end
+$var reg 6 $ opcode [5:0] $end
+$var reg 6 % operationnumber [5:0] $end
+$var reg 3 & source_1 [2:0] $end
+$var reg 3 ' source_2 [2:0] $end
+$var reg 3 ( unsigned_1 [2:0] $end
+$var reg 6 ) unsigned_2 [5:0] $end
+$var reg 9 * unsigned_3 [8:0] $end
+$upscope $end
+$upscope $end
+$scope module sixteenbitdecoder_tb $end
+$scope module fetch_test $end
+$var wire 16 + fetchoutput [15:0] $end
+$var reg 16 , fetchvalue [15:0] $end
+$upscope $end
+$upscope $end
+$scope module sixteenbitdecoder_tb $end
+$var wire 16 - fetchoutput [15:0] $end
+$scope module sixteenbbitdecoder_test $end
+$upscope $end
+$scope module fetch_test $end
+$upscope $end
+$upscope $end
+$scope module testbench $end
+$var wire 1 . destination $end
+$var wire 16 / fetchoutput [15:0] $end
+$var wire 2 0 rd1 [1:0] $end
+$var wire 1 1 rd1_out $end
+$var wire 2 2 rd2 [1:0] $end
+$var wire 1 3 rd2_out $end
+$var wire 2 4 rd3 [1:0] $end
+$var wire 1 5 rd3_out $end
+$var wire 1 6 source_1 $end
+$var wire 1 7 source_2 $end
+$var wire 1 8 unsigned_1 $end
+$var wire 1 9 unsigned_2 $end
+$var wire 1 : unsigned_3 $end
+$var wire 2 ; wr1 [1:0] $end
+$var wire 16 < wr1_data [15:0] $end
+$var wire 1 = wr1_enable $end
+$var wire 2 > wr2 [1:0] $end
+$var wire 16 ? wr2_data [15:0] $end
+$var wire 1 @ wr2_enable $end
+$var reg 1 A clock $end
+$var reg 1 B operationnumber $end
+$var reg 1 C reset $end
+$scope module registerfile_tb $end
+$var wire 1 D clock $end
+$var wire 6 E rd1 [5:0] $end
+$var wire 16 F rd1_out [15:0] $end
+$var wire 6 G rd2 [5:0] $end
+$var wire 16 H rd2_out [15:0] $end
+$var wire 6 I rd3 [5:0] $end
+$var wire 16 J rd3_out [15:0] $end
+$var wire 1 K reset $end
+$var wire 2 L wr1 [1:0] $end
+$var wire 16 M wr1_data [15:0] $end
+$var wire 1 = wr1_enable $end
+$var wire 2 N wr2 [1:0] $end
+$var wire 16 O wr2_data [15:0] $end
+$var wire 1 @ wr2_enable $end
+$upscope $end
+$scope module sixteenbbitdecoder_test $end
+$var wire 1 P bit_check $end
+$var wire 16 Q fetchoutput [15:0] $end
+$var reg 3 R destination [2:0] $end
+$var reg 6 S opcode [5:0] $end
+$var reg 6 T operationnumber [5:0] $end
+$var reg 3 U source_1 [2:0] $end
+$var reg 3 V source_2 [2:0] $end
+$var reg 3 W unsigned_1 [2:0] $end
+$var reg 6 X unsigned_2 [5:0] $end
+$var reg 9 Y unsigned_3 [8:0] $end
+$upscope $end
+$scope module fetch_test $end
+$var wire 16 Z fetchoutput [15:0] $end
+$var reg 16 [ fetchvalue [15:0] $end
+$upscope $end
+$scope module execution_test $end
+$var wire 1 D clock $end
+$var wire 1 . destination $end
+$var wire 1 \ operationnumber $end
+$var wire 1 1 rd1_out $end
+$var wire 1 3 rd2_out $end
+$var wire 1 5 rd3_out $end
+$var wire 1 6 source_1 $end
+$var wire 1 7 source_2 $end
+$var wire 1 8 unsigned_1 $end
+$var wire 1 9 unsigned_2 $end
+$var wire 1 : unsigned_3 $end
+$var reg 1 ] rd1 $end
+$var reg 1 ^ rd2 $end
+$var reg 1 _ rd3 $end
+$var reg 1 ` wr1 $end
+$var reg 16 a wr1_data [15:0] $end
+$var reg 1 b wr1_enable $end
+$var reg 1 c wr2 $end
+$var reg 16 d wr2_data [15:0] $end
+$var reg 1 e wr2_enable $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+xe
+bx d
+xc
+xb
+bx a
+x`
+x_
+x^
+x]
+x\
+b110101010111011 [
+b110101010111011 Z
+b10111011 Y
+b111011 X
+b11 W
+b11 V
+b111 U
+b110101 T
+b110101 S
+b10 R
+b110101010111011 Q
+0P
+bx O
+b0x N
+bx M
+b0x L
+0K
+bx J
+b0x I
+bx H
+b0x G
+bx F
+b0x E
+0D
+0C
+xB
+0A
+x@
+bx ?
+b0x >
+x=
+bx <
+b0x ;
+z:
+z9
+z8
+z7
+z6
+x5
+b0x 4
+x3
+b0x 2
+x1
+b0x 0
+b110101010111011 /
+z.
+b110101010111011 -
+b110101010111011 ,
+b110101010111011 +
+b10111011 *
+b111011 )
+b11 (
+b11 '
+b111 &
+b110101 %
+b110101 $
+b10 #
+b110101010111011 "
+0!
+$end
+#1
+1A
+1D
+#2
+0A
+0D
+#3
+1A
+1D
+#4
+0A
+0D
+#5
+1A
+1D
+1C
+1K
+#6
+0A
+0D
+#7
+1A
+1D
+#8
+0A
+0D
+#9
+1A
+1D
+#10
+0A
+0D
+#11
+1P
+b1100000 Y
+b100000 X
+b0 W
+b0 V
+b100 U
+b1 R
+1!
+b1100000 *
+b100000 )
+b0 (
+b0 '
+b100 &
+b1 #
+1A
+1D
+b1110101001100000 [
+b1110101001100000 /
+b1110101001100000 Q
+b1110101001100000 Z
+b1110101001100000 ,
+b1110101001100000 "
+b1110101001100000 +
+b1110101001100000 -
+#12
+0A
+0D
+#13
+1A
+1D
+#14
+0A
+0D
+#15
+1A
+1D
+#16
+0A
+0D
+#17
+1A
+1D
+#18
+0A
+0D
+#19
+1A
+1D
+#20
+0A
+0D
+#21
+1A
+1D
+#22
+0A
+0D
+#23
+1A
+1D
+#24
+0A
+0D
+#25
+1A
+1D
+0C
+0K
+#26
+0A
+0D
+#27
+1A
+1D
+#28
+0A
+0D
+#29
+1A
+1D
+#30
+0A
+0D
+#31
+0P
+0!
+1A
+1D
+b101110010101111 [
+b101110010101111 /
+b101110010101111 Q
+b101110010101111 Z
+b101110010101111 ,
+b101110010101111 "
+b101110010101111 +
+b101110010101111 -
+#32
+0A
+0D
+#33
+1A
+1D
+#34
+0A
+0D
+#35
+1A
+1D
+#36
+0A
+0D
+#37
+1A
+1D
+#38
+0A
+0D
+#39
+1A
+1D
+#40
+0A
+0D
+#41
+1A
+1D
+#42
+0A
+0D
+#43
+1A
+1D
+#44
+0A
+0D
+#45
+1A
+1D
+#46
+0A
+0D
+#47
+1A
+1D
+#48
+0A
+0D
+#49
+1A
+1D
+#50
+0A
+0D
+#51
+1A
+1D
+#52
+0A
+0D
+#53
+1A
+1D
+#54
+0A
+0D
+#55
+1A
+1D
+#56
+0A
+0D
+#57
+1A
+1D
+#58
+0A
+0D
+#59
+1A
+1D
+#60
+0A
+0D
+#61
+1A
+1D
+#62
+0A
+0D
+#63
+1A
+1D
+#64
+0A
+0D
+#65
+1A
+1D
+#66
+0A
+0D
+#67
+1A
+1D
+#68
+0A
+0D
+#69
+1A
+1D
+#70
+0A
+0D
+#71
+1A
+1D
+#72
+0A
+0D
+#73
+1A
+1D
+#74
+0A
+0D
+#75
+1A
+1D
+#76
+0A
+0D
+#77
+1A
+1D
+#78
+0A
+0D
+#79
+1A
+1D
+#80
+0A
+0D
