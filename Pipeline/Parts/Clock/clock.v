@@ -6,4 +6,7 @@ module TheClock;
 			#1 clock = ~clock;
 		end
 		
+		initial clock = 1;
+
+		
 endmodule

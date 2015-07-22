@@ -36,26 +36,34 @@ module TheInstructionMemory (clock, reset, instruction_rd1, instruction_rd2, ins
 	input          instruction_wr3_enable;		                    //Should it write
 	input 		   instruction_wr4_enable;
 
-// Other output //
-
+// Integers //
+	
+	integer instructionloopcount;
 
 // Registers //
 	
 	reg [15:00] instruction_memory [1048575:00]; 
+// 
 
 // Read logic //
 	
-	assign rd1_out = instruction_memory[rd1];                       //this is combinatoral, this happens automatically
-	assign rd2_out = instruction_memory[rd2];
-	assign rd3_out = instruction_memory[rd3];
-	assign rd4_out = instruction_memory[rd4];
+	assign instruction_rd1_out = instruction_memory[instruction_rd1];                       //this is combinatoral, this happens automatically
+	assign instruction_rd2_out = instruction_memory[instruction_rd2];
+	assign instruction_rd3_out = instruction_memory[instruction_rd3];
+	assign instruction_rd4_out = instruction_memory[instruction_rd4];
 
 // Write logic //
 
 	always @(posedge clock or posedge reset) begin                  // this is sequential, it will only happen on the clock or reset
-		if (reset) begin 	                                        // Reset all Registers
-			instruction_memory[0] = 0;
+		if (reset == 1) begin
+			$readmemb("instructionmemory.list", instruction_memory);
+			/*
+			for (instructionloopcount = 0; instructionloopcount < 1048575; instructionloopcount = instructionloopcount +1) begin
+				instruction_memory[instructionloopcount] = 0;
+			end
+			*/
 		end
+
 		else begin
 		
 			if (instruction_wr1_enable == 1) begin

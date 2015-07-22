@@ -91,6 +91,7 @@ module sixteenbitdecoder_tb;
 
 endmodule
 */
+/*
 module fetch(fetchoutput[15:00]);
     
     output [15:00]fetchoutput;
@@ -101,12 +102,23 @@ module fetch(fetchoutput[15:00]);
     
   initial begin
 	fetchvalue = 0;
-	#40
-	fetchvalue = 522;
-	#40
+	#10
+	fetchvalue = 522;	// adding register 1 and 2 together into 0
+	#10
+	fetchvalue = 578; 	// adding registers 0 and 2 into 1
+	#10
+	fetchvalue = 1218;	// subtracting register 0 from register  into register 3
+	#10
+	fetchvalue = 1665;	// Bitwise AND of register 0 and register 1 into register 2
+	#10
+	fetchvalue = 5142;	// add 6 to register 2 into register 0
+	#10
+	fetchvalue = 6738;	// 2x Logical shift left of register 2 into register 1
+	#450
 	$finish;
 
   end
     assign fetchoutput = fetchvalue;
 
 endmodule
+*/

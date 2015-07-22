@@ -39,21 +39,22 @@ module sixteenbitdecoder(fetchoutput, clock);
 										  
 	always @(posedge clock) begin
 		if (bit_check == 0) begin
-			slices_memory["0b:opcode"]= operation;
+			//slices_memory["0b:opcode"]= operation;
 			/*fetchoutput[01:07] = opcode;*/				
-			assign opcode      = fetchoutput [14:09];	
-			assign destination = fetchoutput [08:06];
-			assign source_1    = fetchoutput [05:03];
-			assign source_2    = fetchoutput [02:00];
-			assign unsigned_1  = fetchoutput [02:00];
-			assign unsigned_2  = fetchoutput [05:00];
-			assign unsigned_3  = fetchoutput [08:00];
-			 operationnumber=opcodemem[opcode];
-
-	end	
+			assign opcode      	= fetchoutput 	[14:09];	
+			assign destination 	= fetchoutput 	[08:06];
+			assign source_1    	= fetchoutput 	[05:03];
+			assign source_2    	= fetchoutput 	[02:00];
+			assign unsigned_1  	= fetchoutput 	[02:00];
+			assign unsigned_2     	= fetchoutput 	[05:00];
+			assign unsigned_3      	= fetchoutput 	[08:00];
+			assign operationnumber 	= opcodemem	[opcode];
+		end	
 		
 		else if (bit_check == 1) begin					
-			
+		
+
+	
 		end							
 	end
 	

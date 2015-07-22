@@ -19,15 +19,16 @@ module registerfile (clock, reset, reg_rd1, reg_rd2, reg_rd3, reg_wr1, reg_wr2, 
 
 // write inputs and outputs //
 	
-	input  [01:00]reg_wr1;		//Where to write, which register
-	input  [01:00]reg_wr2;
+	input  [05:00]reg_wr1;		//Where to write, which register
+	input  [05:00]reg_wr2;
 	input  [15:00]reg_wr1_data;	//What to write
 	input  [15:00]reg_wr2_data;
 	input reg_wr1_enable;		//Should it write
 	input reg_wr2_enable;
 
-// Other output //
+// integers //
 
+	integer dataloopcount;
 
 // Registers //
 	
@@ -44,16 +45,24 @@ module registerfile (clock, reset, reg_rd1, reg_rd2, reg_rd3, reg_wr1, reg_wr2, 
 
 	always @(posedge clock or posedge reset) begin // this is sequential, it will only happen on the clock or reset
 		if (reset) begin 	// Reset all Registers
-			register[0] = 0;
-			register[1] = 0;
-			register[2] = 0;
-			register[3] = 0;
-			register[4] = 0;
-			register[5] = 0;
-			register[6] = 0;
-			register[7] = 0;
-			register[8] = 0;
-			register[9] = 0;
+			$readmemb("register.list", register);
+//			$readmemb("opcodemem.list", opcodemem);
+			/*// Reset Loop //
+		        for (dataloopcount = 0; dataloopcount < 1048575; dataloopcount = dataloopcount +1) begin
+		            register[dataloopcount] = 0;
+		        end
+		    */
+		end 
+/*			register[0]  = 0;
+			register[1]  = 0;
+			register[2]  = 0;
+			register[3]  = 0;
+			register[4]  = 0;
+			register[5]  = 0;
+			register[6]  = 0;
+			register[7]  = 0;
+			register[8]  = 0;
+			register[9]  = 0;
 			register[10] = 0;
 			register[11] = 0;
 			register[12] = 0;
@@ -98,8 +107,7 @@ module registerfile (clock, reset, reg_rd1, reg_rd2, reg_rd3, reg_wr1, reg_wr2, 
 			register[60] = 0;
 			register[61] = 0;
 			register[62] = 0;
-			register[63] = 0;
-		end
+			register[63] = 0; */
 		else begin
 		
 			if (reg_wr1_enable == 1) begin
@@ -111,5 +119,14 @@ module registerfile (clock, reset, reg_rd1, reg_rd2, reg_rd3, reg_wr1, reg_wr2, 
 			end
 		end
 	end
-
+	/*
+	initial begin
+		#6
+		register[0] = 0;
+		register[1] = 3;
+		register[2] = 2;
+		#504
+		$finish;
+	end
+	*/
 endmodule

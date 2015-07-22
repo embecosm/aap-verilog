@@ -10,14 +10,14 @@ module TheDataMemory (clock, reset, data_rd1, data_rd2, data_rd3, data_rd4, data
 
 
 	input  [08:00] data_rd1; 	                            //Which register to read from
-	input  [08:00] data_rd2;		                        //20 bits wide because we have up to 512 data
+	input  [08:00] data_rd2;		                            //20 bits wide because we have up to 1048576 data
 	input  [08:00] data_rd3;
 	input  [08:00] data_rd4;				
 
-	output [15:00] data_rd1_out;                         	//What is in that register
-	output [15:00] data_rd2_out;
-	output [15:00] data_rd3_out;
-	output [15:00] data_rd4_out;
+	output [31:00] data_rd1_out;                         	//What is in that register
+	output [31:00] data_rd2_out;
+	output [31:00] data_rd3_out;
+	output [31:00] data_rd4_out;
 
 // write inputs and outputs //
 	
@@ -34,12 +34,21 @@ module TheDataMemory (clock, reset, data_rd1, data_rd2, data_rd3, data_rd4, data
 	input          data_wr3_enable;		                    //Should it write
 	input 		   data_wr4_enable;
 
-// Other output //
-
+// Integers //
+	integer dataloopcount;
 
 // Registers //
 	
-	reg [31:00] data_memory [511:00]; 
+	reg [31:00] data_memory [1048575:00]; 
+
+// Reset Loop //
+
+	always @(posedge reset) begin
+		for (dataloopcount = 0; dataloopcount < 1048575; dataloopcount = dataloopcount +1) begin
+			data_memory[dataloopcount] = 0;
+		end
+	end
+
 
 // Read logic //
 	
@@ -52,7 +61,7 @@ module TheDataMemory (clock, reset, data_rd1, data_rd2, data_rd3, data_rd4, data
 
 	always @(posedge clock or posedge reset) begin          // this is sequential, it will only happen on the clock or reset
 		if (reset) begin 	                                // Reset all Registers
-			data_memory[0:31:511] = 0;
+			data_memory[0] = 0;
 		end
 		else begin
 		
