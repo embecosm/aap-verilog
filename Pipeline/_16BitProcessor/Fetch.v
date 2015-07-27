@@ -39,6 +39,6 @@ module fetch(clock, instruction_rd1, instruction_rd1_out, fetchoutput, pcchange,
 	assign instruction_rd1 = programcounter;	//finds the palce in memory that is equal to the value of programcounter
 	assign fetchoutput = instruction_rd1_out;	// sets that as fetchoutput
 
-	initial programcounter = 0;
+//	initial programcounter = 0;
 	
 endmodule
