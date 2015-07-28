@@ -50,8 +50,8 @@ module execution (	clock,
 					pcjumpenable,
 					pclocation,
 					previous_programcounter,
-					super_doper_a,
-					super_doper_b
+					super_duper_a,
+					super_duper_b
 					);
 	
 	input clock;
@@ -116,8 +116,8 @@ module execution (	clock,
 
 	input [19:00]previous_programcounter;
 
-	input super_doper_a;
-	input super_doper_b;
+	input super_duper_a;
+	input super_duper_b;
 
 	// input [63:00]register;
 
@@ -154,14 +154,17 @@ module execution (	clock,
 	reg			data_wr3_enable;
 	reg 		data_wr4_enable;
 
+	reg carrybit;
+	reg [16:00] carryreg;
+
 	wire [05:00] destination;	
 
 	reg [08:00]pcchange;
 	reg [02:00]pcjumpenable;
 	reg [02:00]pclocation;
 
-	wire super_doper_a;
-	wire super_doper_b;
+	wire super_duper_a;
+	wire super_duper_b;
 
 	always @(posedge clock) begin
 
@@ -178,12 +181,26 @@ module execution (	clock,
 		end
 		
 		if (operationnumber == 1) begin 	//unsigned add	
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out + reg_rd2_out;
-			reg_wr1_enable = 1;
+			if (super_duper_a == 1) begin
+				carryreg = reg_rd1_out + reg_rd2_out + carrybit;
+				reg_wr1_data = carryreg[15:00];
+				carrybit = carryreg[16];
+				reg_wr1_enable = 1;
+			end
+			else begin
+				reg_wr1 = destination;
+				reg_wr1_data = reg_rd1_out + reg_rd2_out;
+				reg_wr1_enable = 1;
+			end
 		end
 
-		if (operationnumber == 2) begin 	//unsigned subtract
+		if (operationnumber == 2) begin 	//unsigned subtract 	
+			if (super_duper_a == 1 ) begin
+				carryreg = reg_rd1_out - reg_rd2_out - carrybit;
+				reg_wr1_data = carryreg[15:00];
+				carrybit = carryreg[16];
+				reg_wr1_enable = 1;
+			end
 			reg_wr1 = destination;
 			reg_wr1_data = reg_rd1_out - reg_rd2_out;
 			reg_wr1_enable = 1;
@@ -191,7 +208,7 @@ module execution (	clock,
 		end
 
 		if (operationnumber == 3) begin 	//bitwise AND 
-			if (super_doper_b == 1) begin 	//bitwise AND immediate
+			if (super_duper_b == 1) begin 	//bitwise AND immediate
 				reg_wr1 = destination;
 				reg_wr1_data = reg_rd1_out & unsigned_5;
 				reg_wr1_enable = 1;	
@@ -204,7 +221,7 @@ module execution (	clock,
 		end
 
 		if (operationnumber == 4) begin 	//bitwise OR
-			if (super_doper_b == 1) begin 	//bitwise OR immediate
+			if (super_duper_b == 1) begin 	//bitwise OR immediate
 				reg_wr1 = destination;
 				reg_wr1_data = reg_rd1_out | unsigned_5;
 				reg_wr1_enable = 1;
@@ -217,7 +234,7 @@ module execution (	clock,
 		end
 
 		if (operationnumber == 5) begin 	//bitwise exclusive OR
-			if (super_doper_b == 1) begin 	//bitwise exclusive OR immediate
+			if (super_duper_b == 1) begin 	//bitwise exclusive OR immediate
 				reg_wr1 = destination;
 				reg_wr1_data = reg_rd1_out ^ unsigned_5;
 				reg_wr1_enable = 1;
