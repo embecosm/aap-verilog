@@ -43,25 +43,20 @@ module TheDataMemory (clock, reset, data_rd1, data_rd2, data_rd3, data_rd4, data
 
 // Reset Loop //
 
-	always @(posedge reset) begin
-		for (dataloopcount = 0; dataloopcount < 1048575; dataloopcount = dataloopcount +1) begin
-			data_memory[dataloopcount] = 0;
-		end
-	end
 
 
 // Read logic //
 	
-	assign rd1_out = data_memory[rd1];                      //this is combinatoral, this happens automatically
-	assign rd2_out = data_memory[rd2];
-	assign rd3_out = data_memory[rd3];
-	assign rd4_out = data_memory[rd4];
+	assign data_rd1_out = data_memory[data_rd1];                      //this is combinatoral, this happens automatically
+	assign data_rd2_out = data_memory[data_rd2];
+	assign data_rd3_out = data_memory[data_rd3];
+	assign data_rd4_out = data_memory[data_rd4];
 
 // Write logic //
 
 	always @(posedge clock or posedge reset) begin          // this is sequential, it will only happen on the clock or reset
 		if (reset) begin 	                                // Reset all Registers
-			data_memory[0] = 0;
+			$readmemb("datamemory.list", data_memory);
 		end
 		else begin
 		
