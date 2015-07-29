@@ -78,16 +78,16 @@ module testbench;
     wire [19:00] instruction_rd1;
     wire [19:00] instruction_rd2;
 	wire [19:00] instruction_rd3;
-	wire [19:00] instruction_rd4
-	;
+	wire [19:00] instruction_rd4;
 	wire [15:00] instruction_rd1_out;
 	wire [15:00] instruction_rd2_out;
 	wire [15:00] instruction_rd3_out;
 	wire [15:00] instruction_rd4_out;
 
 	wire [08:00]pcchange;
-	wire [02:00]pcjumpenable;
-	wire [02:00]pclocation;
+	wire [05:00]pclocation;
+
+    wire [02:00]pcjumpenable; 
 
     reg [15:00] fetch1;
     reg [15:00] fetch2;
@@ -131,19 +131,21 @@ module testbench;
     	);
 
     fetch fetch_test (
-    	clock, 
+    	clock,
+        reset, 
     	instruction_rd1[19:00], 
     	instruction_rd1_out[15:00],
     	fetchoutput[31:00],
     	pcchange[08:00],
-		pcjumpenable[02:00],
-		pclocation[02:00],
+		pclocation[05:00],
+        pcjumpenable[02:00],
 		previous_programcounter[19:00],
         flush
     	);
 
     execution execution_test (
     	clock, 
+        reset,
     	operationnumber[05:00], 
     	destination[05:00], 
     	source_1[05:00], 
@@ -188,40 +190,12 @@ module testbench;
     	data_rd2_out[31:00], 
     	data_rd3_out[31:00], 
     	data_rd4_out[31:00],
-    	pcchange[08:00],
+        pcchange[08:00],        
 		pcjumpenable[02:00],
-		pclocation[02:00],
-    	pcchange[08:00],
-		pcjumpenable[02:00],
-		pclocation[02:00],
+		pclocation[05:00],
 		previous_programcounter[19:00],
         super_duper_a,
         super_duper_b
-    	);
-
-    TheDataMemory TheDataMemory_test (
-    	clock, 
-    	reset, 
-    	data_rd1[08:00], 
-    	data_rd2[08:00], 
-    	data_rd3[08:00], 
-    	data_rd4[08:00], 
-    	data_wr1[08:00], 
-    	data_wr2[08:00], 
-    	data_wr3[08:00], 
-    	data_wr4[08:00], 
-    	data_wr1_data[31:00], 
-    	data_wr2_data[31:00], 
-    	data_wr3_data[31:00], 
-    	data_wr4_data[31:00], 
-    	data_wr1_enable, 
-    	data_wr2_enable, 
-    	data_wr3_enable, 
-    	data_wr4_enable, 
-    	data_rd1_out[31:00], 
-    	data_rd2_out[31:00], 
-    	data_rd3_out[31:00], 
-    	data_rd4_out[31:00]
     	);
 
     TheInstructionMemory TheInstructionMemory_test (
@@ -249,9 +223,34 @@ module testbench;
     	instruction_rd4_out[15:00]
     	);
 
+    TheDataMemory TheDataMemory_test (
+        clock, 
+        reset, 
+        data_rd1[08:00], 
+        data_rd2[08:00], 
+        data_rd3[08:00], 
+        data_rd4[08:00], 
+        data_wr1[08:00], 
+        data_wr2[08:00], 
+        data_wr3[08:00], 
+        data_wr4[08:00], 
+        data_wr1_data[31:00], 
+        data_wr2_data[31:00], 
+        data_wr3_data[31:00], 
+        data_wr4_data[31:00], 
+        data_wr1_enable, 
+        data_wr2_enable, 
+        data_wr3_enable, 
+        data_wr4_enable, 
+        data_rd1_out[31:00], 
+        data_rd2_out[31:00], 
+        data_rd3_out[31:00], 
+        data_rd4_out[31:00]
+        );
+
 		initial begin
 			$dumpfile ("execution_tb.vcd");
-			$dumpvars (0, registerfile_tb, decoder_test, fetch_test, execution_test, TheInstructionMemory_test);
+			$dumpvars (0, registerfile_tb, decoder_test, fetch_test, execution_test, TheInstructionMemory_test, TheDataMemory_test);
 			clock = 0;
 			#2
 				reset = 1;

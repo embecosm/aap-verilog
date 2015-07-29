@@ -1,8 +1,11 @@
-module fetch(	clock, 
+module fetch(	clock,
+				reset, 
 				instruction_rd1, 
 				instruction_rd1_out, 
-				fetchoutput, pcchange, 
-				pcjumpenable, pclocation, 
+				fetchoutput,
+				pcchange, 
+				pclocation,
+				pcjumpenable, 
 				previous_programcounter,
 				flush
 				);
@@ -12,15 +15,17 @@ module fetch(	clock,
 	output [19:00]previous_programcounter;
 
 	input clock;
+	input reset;
 	input [15:00]instruction_rd1_out;
 	
 	input [08:00]pcchange;
+	input [05:00]pclocation;
 	input [02:00]pcjumpenable;
-	input [02:00]pclocation;
 
 	input flush;
 
 	wire clock;
+	wire reset;
 
 	wire [31:00] fetchoutput;
 	reg [15:00] fetch1;
@@ -39,30 +44,59 @@ module fetch(	clock,
 	assign instruction_rd1 = programcounter;		
 
 
+
 	always @(posedge clock) begin
 
-		fetch1 = fetch2;
-		fetch2 = instruction_rd1_out;
-		previous_programcounter = programcounter;
 
-		if (pcjumpenable == 0) begin
-			programcounter <= programcounter + 1;
+		if (reset == 1) begin
+			programcounter = 0;
 		end
 
-		if (pcjumpenable == 1) begin
-			programcounter <= programcounter + pcchange;
+		else begin
+			
+		//	fetch1 = fetch2;
+		//	fetch2 = instruction_rd1_out;
+		
+
+			if (pcjumpenable == 1) begin
+				if (programcounter == previous_programcounter + pcchange) begin
+					
+				end
+				else begin
+				programcounter = programcounter + pcchange;		
+				fetch1 = fetch2;
+				fetch2 = instruction_rd1_out;
+				end
+			end
+
+			if (pcjumpenable == 2) begin
+				programcounter = pclocation;
+				fetch1 = fetch2;
+				fetch2 = instruction_rd1_out;
+			end
+
+			if (pcjumpenable == 3) begin
+				if (programcounter == pclocation) begin
+					programcounter <= previous_programcounter + 1;
+				end
+
+				programcounter = pclocation;
+				fetch1 = fetch2;
+				fetch2 = instruction_rd1_out;
+			end
+
+			if (pcjumpenable == 0) begin
+				programcounter = programcounter + 1;
+				fetch1 = fetch2;
+				fetch2 = instruction_rd1_out;
+				previous_programcounter = programcounter;			
+			end
+
+			if (flush == 1) begin
+				fetch1 = 0000000000000000; 	//????????????????????????????????????
+			end
+
 		end
-
-		if (pcjumpenable == 2) begin
-			programcounter <= pclocation;
-		end
-
-		if (flush == 1) begin
-			fetch1 = 0000000000000000;
-		end
-
-
-
 		
 	end
 
@@ -88,6 +122,6 @@ module fetch(	clock,
 	
 	end
 */
-	initial programcounter = 0;
+	
 	
 endmodule

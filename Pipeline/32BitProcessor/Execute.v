@@ -1,4 +1,5 @@
 module execution (	clock, 
+					reset,
 					operationnumber,
 					destination,
 					source_1,
@@ -46,15 +47,13 @@ module execution (	clock,
 					pcchange,
 					pcjumpenable,
 					pclocation,
-    				pcchange,
-					pcjumpenable,
-					pclocation,
 					previous_programcounter,
 					super_duper_a,
 					super_duper_b
 					);
 	
 	input clock;
+	input reset;
 	input [05:00]operationnumber;
 	input [05:00]destination; 
 	input [05:00]source_2;
@@ -112,7 +111,7 @@ module execution (	clock,
 
 	output [08:00]pcchange;
 	output [02:00]pcjumpenable;
-	output [02:00]pclocation;
+	output [05:00]pclocation;
 
 	input [19:00]previous_programcounter;
 
@@ -161,394 +160,399 @@ module execution (	clock,
 
 	reg [08:00]pcchange;
 	reg [02:00]pcjumpenable;
-	reg [02:00]pclocation;
+	reg [05:00]pclocation;
 
 	wire super_duper_a;
 	wire super_duper_b;
 
 	always @(posedge clock) begin
 
-		reg_wr1_enable = 0;
-		reg_wr2_enable = 0;
-		reg_rd1 = source_1;
-		reg_rd2 = source_2;
-		reg_rd3 = destination;
-		pcjumpenable = 0;
-
-		if (operationnumber == 0) begin 	//no operation
 			reg_wr1_enable = 0;
 			reg_wr2_enable = 0;
-		end
+			reg_rd1 = source_1;
+			reg_rd2 = source_2;
+			reg_rd3 = destination;
+			pcjumpenable = 0;
+
+			if (operationnumber == 0) begin 	//no operation
+				reg_wr1_enable = 0;
+				reg_wr2_enable = 0;
+				
+			end
+			
+			if (operationnumber == 1) begin 	//unsigned add	
+	/*			if (super_duper_a == 1) begin
+					reg_wr1 = destination;
+					carryreg = reg_rd1_out + reg_rd2_out + carrybit;
+					reg_wr1_data = carryreg[15:00];
+					carrybit = carryreg[16];
+					reg_wr1_enable = 1;
+				end
+				else begin
+	*/				reg_wr1 = destination;
+					reg_wr1_data = reg_rd1_out + reg_rd2_out;
+					reg_wr1_enable = 1;
+	//			end
+			end
+
+			if (operationnumber == 2) begin 	//unsigned subtract 	
+	/*			if (super_duper_a == 1 ) begin
+					carryreg = reg_rd1_out - reg_rd2_out - carrybit;
+					reg_wr1_data = carryreg[15:00];
+					carrybit = carryreg[16];
+					reg_wr1_enable = 1;
+				end
+				else begin
+	*/				reg_wr1 = destination;
+					reg_wr1_data = reg_rd1_out - reg_rd2_out;
+					reg_wr1_enable = 1;
+	//			end
+			end
+
+			if (operationnumber == 3) begin 	//bitwise AND 
+				if (super_duper_b == 1) begin 	//bitwise AND immediate
+					reg_wr1 = destination;
+					reg_wr1_data = reg_rd1_out & unsigned_5;
+					reg_wr1_enable = 1;	
+				end
+				else begin
+					reg_wr1 = destination;
+					reg_wr1_data = reg_rd1_out & reg_rd2_out;
+					reg_wr1_enable = 1;
+				end
+			end
+
+			if (operationnumber == 4) begin 	//bitwise OR
+				if (super_duper_b == 1) begin 	//bitwise OR immediate
+					reg_wr1 = destination;
+					reg_wr1_data = reg_rd1_out | unsigned_5;
+					reg_wr1_enable = 1;
+				end
+				else begin
+					reg_wr1 = destination;
+					reg_wr1_data = reg_rd1_out | reg_rd2_out;
+					reg_wr1_enable = 1;
+				end
+			end
+
+			if (operationnumber == 5) begin 	//bitwise exclusive OR
+				if (super_duper_b == 1) begin 	//bitwise exclusive OR immediate
+					reg_wr1 = destination;
+					reg_wr1_data = reg_rd1_out ^ unsigned_5;
+					reg_wr1_enable = 1;
+				end
+				else begin
+					reg_wr1 = destination;
+					reg_wr1_data = reg_rd1_out ^ reg_rd2_out;
+					reg_wr1_enable = 1;
+				end
+			end
+
+			if (operationnumber == 6) begin 	// arithmetic shift right
+				reg_wr1 = destination;
+				reg_wr1_data = reg_rd1_out >>> reg_rd2_out;
+				reg_wr1_enable = 1;
+				
+			end
+
+			if (operationnumber == 7) begin 	// Logical left shift
+				reg_wr1 = destination;
+				reg_wr1_data = reg_rd1_out << reg_rd2_out;
+				reg_wr1_enable = 1;
+				
+			end
+
+			if (operationnumber == 8) begin 	// Logical right shift
+				reg_wr1 = destination;
+				reg_wr1_data = reg_rd1_out >> reg_rd2_out;
+				reg_wr1_enable = 1;
+				
+			end
+
+			if (operationnumber == 9) begin 	// move register to register
+				reg_rd1 = source_1;
+				reg_wr1 = destination;
+				reg_wr1_data = reg_rd1_out;
+				reg_wr1_enable = 1;
+			end
+
+			if (operationnumber == 10) begin 	//unsigned add immediate
+				reg_wr1 = destination;
+				reg_wr1_data = reg_rd1_out + unsigned_1;
+				reg_wr1_enable = 1;
+				
+			end
+
+			if (operationnumber == 11) begin 	//unsigned subtract immediate
+				reg_wr1 = destination;
+				reg_wr1_data = reg_rd1_out - unsigned_1;
+				reg_wr1_enable = 1;
+				
+			end
+
+			if (operationnumber == 12) begin 	//arithmetic shift right immediate
+				reg_wr1 = destination;
+				reg_wr1_data = reg_rd1_out >>> unsigned_1;
+				reg_wr1_enable = 1;
+				
+			end
+
+			if (operationnumber == 13) begin 	//logical shift left immediate
+				reg_wr1 = destination;
+				reg_wr1_data = reg_rd1_out << unsigned_1;
+				reg_wr1_enable = 1;
+				
+			end
+
+			if (operationnumber == 14) begin 	//logical shift right immediate
+				reg_wr1 = destination;
+				reg_wr1_data = reg_rd1_out >> unsigned_1;
+				reg_wr1_enable = 1;
+				
+			end
+
+			if (operationnumber == 15) begin 	//Move immeidate to register
+				reg_wr1 = destination;
+				reg_wr1_data = unsigned_2;
+				reg_wr1_enable = 1;
+			end
+
+			if (operationnumber == 16) begin 	//indexed load byte
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_rd1 = (reg_rd1_out + unsigned_1);
+				reg_wr1_data = data_rd1_out[07:00];
+				reg_wr1_enable = 1;
+				pcjumpenable = 0;
+			end
+
+			if (operationnumber == 17) begin 	//indexed load byte with predecrement
+				reg_rd2 = source_1;
+				reg_wr2 = source_1;
+				reg_wr2_data = reg_rd2_out - 1;
+				reg_wr2_enable = 1;
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_rd1 = (reg_rd1_out + unsigned_1);
+				reg_wr1_data = data_rd1_out[07:00];
+				reg_wr1_enable = 1;
+			end
+
+			if (operationnumber == 18) begin 	//indexed load byte with postincrement
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_rd1 = (reg_rd1_out + unsigned_1);
+				reg_wr1_data = data_rd1_out[07:00];
+				reg_wr1_enable = 1;
+				reg_rd2 = source_1;
+				reg_wr2 = source_1;
+				reg_wr2_data = reg_rd2_out + 1;
+				reg_wr2_enable = 1;
+			end
+
+			if (operationnumber == 20) begin 	//indexed load word
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_rd1 = (reg_rd1_out + unsigned_1);
+				reg_wr1_data = data_rd1_out[15:00];
+				reg_wr1_enable = 1;
+			end
+
+			if (operationnumber == 21) begin 	//indexed load word with predecrement
+				reg_rd2 = source_1;
+				reg_wr2 = source_1;
+				reg_wr2_data = reg_rd2_out - 2;
+				reg_wr2_enable = 1;
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_rd1 = (reg_rd1_out + unsigned_1);
+				reg_wr1_data = data_rd1_out[15:00];
+				reg_wr1_enable = 1;
+			end
+
+			if (operationnumber == 22) begin 	//indexed load word with postincrement
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_rd1 = (reg_rd1_out + unsigned_1);
+				reg_wr1_data = data_rd1_out[15:00];
+				reg_wr1_enable = 1;
+				reg_rd2 = source_1;
+				reg_wr2 = source_1;
+				reg_wr2_data = reg_rd2_out + 2;
+				reg_wr2_enable = 1;
+			end
+
+
+			if (operationnumber == 24) begin 	//indexed store byte
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_wr1 = (reg_rd1_out + unsigned_1);
+				data_wr1_data[7:00] = reg_rd1_out;
+				data_wr1_enable = 1;
+			end
+
+			if (operationnumber == 25) begin 	//indexed store byte with predecrement
+				reg_rd2 = source_1;
+				reg_wr2 = source_1;
+				reg_wr2_data = reg_rd2_out - 1;
+				reg_wr2_enable = 1;			
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_wr1 = (reg_rd1_out + unsigned_1);
+				data_wr1_data[7:00] = reg_rd1_out;
+				data_wr1_enable = 1;
+			end
+
+			if (operationnumber == 26) begin 	//indexed store byte with postincrement
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_wr1 = (reg_rd1_out + unsigned_1);
+				data_wr1_data[7:00] = reg_rd1_out;
+				data_wr1_enable = 1;
+				reg_rd2 = source_1;
+				reg_wr2 = source_1;
+				reg_wr2_data = reg_rd2_out + 1;
+				reg_wr2_enable = 1;
+			end
+
+			if (operationnumber == 28) begin 	//indexed store word
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_wr1 = (reg_rd1_out + unsigned_1);
+				data_wr1_data[15:00] = reg_rd1_out;
+				data_wr1_enable = 1;
+			end
+
+			if (operationnumber == 29) begin 	//indexed store word with predecrement
+				reg_rd2 = source_1;
+				reg_wr2 = source_1;
+				reg_wr2_data = reg_rd2_out - 2;
+				reg_wr2_enable = 1;			
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_wr1 = (reg_rd1_out + unsigned_1);
+				data_wr1_data[15:00] = reg_rd1_out;
+				data_wr1_enable = 1;
+			end
+
+			if (operationnumber == 30) begin 	//indexed store word with postincrement
+				reg_wr1 = destination;
+				reg_rd1 = source_1;
+				data_wr1 = (reg_rd1_out + unsigned_1);
+				data_wr1_data[15:00] = reg_rd1_out;
+				data_wr1_enable = 1;
+				reg_rd2 = source_1;
+				reg_wr2 = source_1;
+				reg_wr2_data = reg_rd2_out + 2;
+				reg_wr2_enable = 1;
+			end
+
+			if (operationnumber == 32) begin        //relative branch
+				pcchange = signed_1;
+				pcjumpenable = 1;
+			end
+
+			if (operationnumber == 33) begin        //relative branch and link
+				pcchange = signed_2;
+				pcjumpenable = 1;
+				pclocation <= previous_programcounter;
+			end
+
+			if (operationnumber == 34) begin        //relative branch if equal
+				if (source_1 == source_2) begin
+					pcchange = signed_3;
+					pcjumpenable = 1;
+				end
+			end
+
+			if (operationnumber == 35) begin        //relative branch if not equal
+				if (source_1 !== source_2) begin
+					pcchange = signed_3;
+					pcjumpenable = 1;
+				end
+			end
+
+			if (operationnumber == 38) begin        //relative branch if unsigned less than
+				if (source_1 < source_2) begin
+					pcchange = signed_3;
+					pcjumpenable = 1;
+				end
+			end
+
+			if (operationnumber == 39) begin        //relative branch if unsigned greater than
+				if (source_1 > source_2) begin
+					pcchange = signed_3;
+					pcjumpenable = 1;
+				end
+			end
+
+			if (operationnumber == 38) begin        //relative branch if signed less than
+				if ($signed(source_1) < $signed (source_2)) begin
+					pcchange = signed_3;
+					pcjumpenable = 1;
+				end
+			end
+
+			if (operationnumber == 39) begin        //relative branch if signed greater than
+				if ($signed(source_1) > $signed(source_2)) begin
+					pcchange = signed_3;
+					pcjumpenable = 1;
+				end
+			end
+
+			if (operationnumber == 40) begin        //absolute jump
+				pclocation = destination;
+				pcjumpenable = 2;
+			end
+
+			if (operationnumber == 41) begin 		//absolute jump and link
+				pclocation = destination;
+				pcjumpenable = 3;
+				//pclocation <= previous_programcounter;
+			end
+
+			if (operationnumber == 42) begin        //absolute jump if equal
+				if (source_1 == source_2) begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
+			end
+
+			if (operationnumber == 43) begin        //absolute jump if not equal
+				if (source_1 !== source_2) begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
+			end
+
+			if (operationnumber == 44) begin        //absolute jump if signed less than
+				if ($signed(source_1) < $signed(source_2)) begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
+			end
+
+			if (operationnumber == 45) begin        //absolute jump if signed greater than
+				if ($signed(source_1) > $signed(source_2)) begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
+			end
+
+			if (operationnumber == 46) begin        //absolute jump if unsigned less than
+				if (source_1 < source_2) begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
+			end
+
+			if (operationnumber == 47) begin        //absolute jump if unsigned greater than
+				if (source_1 > source_2) begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
+			end
+
 		
-		if (operationnumber == 1) begin 	//unsigned add	
-			if (super_duper_a == 1) begin
-				carryreg = reg_rd1_out + reg_rd2_out + carrybit;
-				reg_wr1_data = carryreg[15:00];
-				carrybit = carryreg[16];
-				reg_wr1_enable = 1;
-			end
-			else begin
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out + reg_rd2_out;
-				reg_wr1_enable = 1;
-			end
-		end
-
-		if (operationnumber == 2) begin 	//unsigned subtract 	
-			if (super_duper_a == 1 ) begin
-				carryreg = reg_rd1_out - reg_rd2_out - carrybit;
-				reg_wr1_data = carryreg[15:00];
-				carrybit = carryreg[16];
-				reg_wr1_enable = 1;
-			end
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out - reg_rd2_out;
-			reg_wr1_enable = 1;
-			
-		end
-
-		if (operationnumber == 3) begin 	//bitwise AND 
-			if (super_duper_b == 1) begin 	//bitwise AND immediate
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out & unsigned_5;
-				reg_wr1_enable = 1;	
-			end
-			else begin
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out & reg_rd2_out;
-				reg_wr1_enable = 1;
-			end
-		end
-
-		if (operationnumber == 4) begin 	//bitwise OR
-			if (super_duper_b == 1) begin 	//bitwise OR immediate
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out | unsigned_5;
-				reg_wr1_enable = 1;
-			end
-			else begin
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out | reg_rd2_out;
-				reg_wr1_enable = 1;
-			end
-		end
-
-		if (operationnumber == 5) begin 	//bitwise exclusive OR
-			if (super_duper_b == 1) begin 	//bitwise exclusive OR immediate
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out ^ unsigned_5;
-				reg_wr1_enable = 1;
-			end
-			else begin
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out ^ reg_rd2_out;
-				reg_wr1_enable = 1;
-			end
-		end
-
-		if (operationnumber == 6) begin 	// arithmetic shift right
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out >>> reg_rd2_out;
-			reg_wr1_enable = 1;
-			
-		end
-
-		if (operationnumber == 7) begin 	// Logical left shift
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out << reg_rd2_out;
-			reg_wr1_enable = 1;
-			
-		end
-
-		if (operationnumber == 8) begin 	// Logical right shift
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out >> reg_rd2_out;
-			reg_wr1_enable = 1;
-			
-		end
-
-		if (operationnumber == 9) begin 	// move register to register
-			reg_rd1 = source_1;
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out;
-			reg_wr1_enable = 1;
-		end
-
-		if (operationnumber == 10) begin 	//unsigned add immediate
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out + unsigned_1;
-			reg_wr1_enable = 1;
-			
-		end
-
-		if (operationnumber == 11) begin 	//unsigned subtract immediate
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out - unsigned_1;
-			reg_wr1_enable = 1;
-			
-		end
-
-		if (operationnumber == 12) begin 	//arithmetic shift right immediate
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out >>> unsigned_1;
-			reg_wr1_enable = 1;
-			
-		end
-
-		if (operationnumber == 13) begin 	//logical shift left immediate
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out << unsigned_1;
-			reg_wr1_enable = 1;
-			
-		end
-
-		if (operationnumber == 14) begin 	//logical shift right immediate
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out >> unsigned_1;
-			reg_wr1_enable = 1;
-			
-		end
-
-		if (operationnumber == 15) begin 	//Move immeidate to register
-			reg_wr1 = destination;
-			reg_wr1_data = unsigned_2;
-			reg_wr1_enable = 1;
-		end
-
-		if (operationnumber == 16) begin 	//indexed load byte
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			reg_wr1_data = data_rd1_out[07:00];
-			reg_wr1_enable = 1;
-		end
-
-		if (operationnumber == 17) begin 	//indexed load byte with predecrement
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out - 1;
-			reg_wr2_enable = 1;
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			reg_wr1_data = data_rd1_out[07:00];
-			reg_wr1_enable = 1;
-		end
-
-		if (operationnumber == 18) begin 	//indexed load byte with postincrement
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			reg_wr1_data = data_rd1_out[07:00];
-			reg_wr1_enable = 1;
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out + 1;
-			reg_wr2_enable = 1;
-		end
-
-		if (operationnumber == 20) begin 	//indexed load word
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			reg_wr1_data = data_rd1_out[15:00];
-			reg_wr1_enable = 1;
-		end
-
-		if (operationnumber == 21) begin 	//indexed load word with predecrement
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out - 2;
-			reg_wr2_enable = 1;
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			reg_wr1_data = data_rd1_out[15:00];
-			reg_wr1_enable = 1;
-		end
-
-		if (operationnumber == 22) begin 	//indexed load word with postincrement
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			reg_wr1_data = data_rd1_out[15:00];
-			reg_wr1_enable = 1;
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out + 2;
-			reg_wr2_enable = 1;
-		end
-
-
-		if (operationnumber == 24) begin 	//indexed store byte
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data[7:00] = reg_rd1_out;
-			data_wr1_enable = 1;
-		end
-
-		if (operationnumber == 25) begin 	//indexed store byte with predecrement
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out - 1;
-			reg_wr2_enable = 1;			
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data[7:00] = reg_rd1_out;
-			data_wr1_enable = 1;
-		end
-
-		if (operationnumber == 26) begin 	//indexed store byte with postincrement
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data[7:00] = reg_rd1_out;
-			data_wr1_enable = 1;
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out + 1;
-			reg_wr2_enable = 1;
-		end
-
-		if (operationnumber == 28) begin 	//indexed store word
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data[15:00] = reg_rd1_out;
-			data_wr1_enable = 1;
-		end
-
-		if (operationnumber == 29) begin 	//indexed store word with predecrement
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out - 2;
-			reg_wr2_enable = 1;			
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data[15:00] = reg_rd1_out;
-			data_wr1_enable = 1;
-		end
-
-		if (operationnumber == 30) begin 	//indexed store word with postincrement
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data[15:00] = reg_rd1_out;
-			data_wr1_enable = 1;
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out + 2;
-			reg_wr2_enable = 1;
-		end
-
-		if (operationnumber == 32) begin        //relative branch
-			pcchange = signed_1;
-			pcjumpenable = 1;
-		end
-
-		if (operationnumber == 33) begin        //relative branch and link
-			pcchange = signed_2;
-			pcjumpenable = 1;
-			pclocation <= previous_programcounter;
-		end
-
-		if (operationnumber == 34) begin        //relative branch if equal
-			if (source_1 == source_2) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-
-		if (operationnumber == 35) begin        //relative branch if not equal
-			if (source_1 !== source_2) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-
-		if (operationnumber == 38) begin        //relative branch if unsigned less than
-			if (source_1 < source_2) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-
-		if (operationnumber == 39) begin        //relative branch if unsigned greater than
-			if (source_1 > source_2) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-
-		if (operationnumber == 38) begin        //relative branch if signed less than
-			if ($signed(source_1) < $signed (source_2)) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-
-		if (operationnumber == 39) begin        //relative branch if signed greater than
-			if ($signed(source_1) > $signed(source_2)) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-
-		if (operationnumber == 40) begin        //absolute jump
-			pclocation = destination[02:00];
-			pcjumpenable = 2;
-		end
-
-		if (operationnumber == 41) begin 		//absolute jump and link
-			pclocation = destination[02:00];
-			pcjumpenable = 2;
-			pclocation <= previous_programcounter;
-		end
-
-		if (operationnumber == 42) begin        //absolute jump if equal
-			if (source_1 == source_2) begin
-				pclocation = destination[02:00];
-				pcjumpenable = 2;
-			end
-		end
-
-		if (operationnumber == 43) begin        //absolute jump if not equal
-			if (source_1 !== source_2) begin
-				pclocation = destination[02:00];
-				pcjumpenable = 2;
-			end
-		end
-
-		if (operationnumber == 44) begin        //absolute jump if signed less than
-			if ($signed(source_1) < $signed(source_2)) begin
-				pclocation = destination[02:00];
-				pcjumpenable = 2;
-			end
-		end
-
-		if (operationnumber == 45) begin        //absolute jump if signed greater than
-			if ($signed(source_1) > $signed(source_2)) begin
-				pclocation = destination[02:00];
-				pcjumpenable = 2;
-			end
-		end
-
-		if (operationnumber == 46) begin        //absolute jump if unsigned less than
-			if (source_1 < source_2) begin
-				pclocation = destination[02:00];
-				pcjumpenable = 2;
-			end
-		end
-
-		if (operationnumber == 47) begin        //absolute jump if unsigned greater than
-			if (source_1 > source_2) begin
-				pclocation = destination[02:00];
-				pcjumpenable = 2;
-			end
-		end
-
 	end
 endmodule
