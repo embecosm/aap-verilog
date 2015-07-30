@@ -88,8 +88,8 @@ module decoder(	fetchoutput,
 			  
 		if (bit_check == 0) begin				
 			opcode      		= fetchoutput 	[30:25];	
-			destination 		= fetchoutput 	[24:22];
-			source_1    		= fetchoutput 	[21:18];
+			destination		 	= fetchoutput 	[24:22];
+			source_1    		= fetchoutput 	[21:19];
 			source_2    		= fetchoutput 	[17:16];
 			unsigned_1  		= fetchoutput 	[017:16];
 			unsigned_2  		= fetchoutput 	[21:16];
