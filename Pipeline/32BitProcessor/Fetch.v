@@ -58,7 +58,7 @@ module fetch(	clock,
 		//	fetch2 = instruction_rd1_out;
 		
 
-			if (pcjumpenable == 1) begin
+			if (pcjumpenable == 1) begin 										//Relative Branch
 				if (programcounter == previous_programcounter + pcchange) begin
 					
 				end
@@ -69,7 +69,7 @@ module fetch(	clock,
 				end
 			end
 
-			if (pcjumpenable == 2) begin
+			if (pcjumpenable == 2) begin 										//Absolute Jump
 				if (programcounter == pclocation) begin
 					fetch1 = fetch2;
 					fetch2 = instruction_rd1_out;
@@ -81,7 +81,7 @@ module fetch(	clock,
 				end
 			end
 
-			if (pcjumpenable == 3) begin
+			if (pcjumpenable == 3) begin 										//Absolute Jump and Link
 				if (programcounter == pclocation) begin
 					programcounter <= previous_programcounter + 1;
 				end
@@ -92,7 +92,18 @@ module fetch(	clock,
 				end
 			end
 
-			if (pcjumpenable == 0) begin
+			if (pcjumpenable == 4) begin 										//Relative branch and Link
+				if (programcounter == previous_programcounter + pcchange) begin
+					programcounter = previous_programcounter;
+				end
+				else begin
+				programcounter = programcounter + pcchange;		
+				fetch1 = fetch2;
+				fetch2 = instruction_rd1_out;
+				end
+			end
+			
+			if (pcjumpenable == 0) begin 										//Else increment program counter
 				programcounter = programcounter + 1;
 				fetch1 = fetch2;
 				fetch2 = instruction_rd1_out;
