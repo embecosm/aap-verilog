@@ -70,19 +70,26 @@ module fetch(	clock,
 			end
 
 			if (pcjumpenable == 2) begin
-				programcounter = pclocation;
-				fetch1 = fetch2;
-				fetch2 = instruction_rd1_out;
+				if (programcounter == pclocation) begin
+					fetch1 = fetch2;
+					fetch2 = instruction_rd1_out;
+				end
+				else begin	
+					programcounter = pclocation;
+					fetch1 = fetch2;
+					fetch2 = instruction_rd1_out;
+				end
 			end
 
 			if (pcjumpenable == 3) begin
 				if (programcounter == pclocation) begin
 					programcounter <= previous_programcounter + 1;
 				end
-
-				programcounter = pclocation;
-				fetch1 = fetch2;
-				fetch2 = instruction_rd1_out;
+				else begin
+					programcounter = pclocation;
+					fetch1 = fetch2;
+					fetch2 = instruction_rd1_out;
+				end
 			end
 
 			if (pcjumpenable == 0) begin
