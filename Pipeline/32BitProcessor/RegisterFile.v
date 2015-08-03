@@ -117,7 +117,9 @@ module registerfile (clock, reset, reg_rd1, reg_rd2, reg_rd3, reg_wr1, reg_wr2, 
 			if (reg_wr2_enable == 1) begin
 				register[reg_wr2] = reg_wr2_data;
 			end
+
 		end
+		
 	end
 	/*
 	initial begin

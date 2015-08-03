@@ -16,7 +16,7 @@ module decoder(	fetchoutput,
 				super_duper_b
 				);
 
-//	output destination;
+//	Inputs & Putputs //
 
 	output [05:00]destination;
 	output [05:00]operationnumber;
@@ -34,16 +34,13 @@ module decoder(	fetchoutput,
 	output super_duper_a;
 	output super_duper_b;
 
-
-// Inputs & Putputs //
+	output flush;
 
 	input [31:00]fetchoutput;
 
-	output flush;
+	
 
-	wire flush;
-
-	assign flush = bit_check; 
+	
 
 // Registers //	
 	reg [05:00] opcode;
@@ -74,12 +71,14 @@ module decoder(	fetchoutput,
 
 // Wire Declarations //
 
-	wire [31:00] fetchoutput;
-	wire         bit_check;
+	wire [31:00] 	fetchoutput;
+	wire         	bit_check;
+	wire 			flush;
 
 ///////////////////////////////////
 	
-	assign bit_check = fetchoutput[31]; 
+	assign bit_check 	= 	fetchoutput[31];
+	assign flush 		= 	bit_check;  
 	
 /*	fetchoutput[01:07] = opcode; */
 	
@@ -90,8 +89,8 @@ module decoder(	fetchoutput,
 			opcode      		= fetchoutput 	[30:25];	
 			destination		 	= fetchoutput 	[24:22];
 			source_1    		= fetchoutput 	[21:19];
-			source_2    		= fetchoutput 	[17:16];
-			unsigned_1  		= fetchoutput 	[017:16];
+			source_2    		= fetchoutput 	[18:16];
+			unsigned_1  		= fetchoutput 	[18:16];
 			unsigned_2  		= fetchoutput 	[21:16];
 			unsigned_3  		= fetchoutput 	[24:16];
 			signed_1			= fetchoutput 	[24:16];

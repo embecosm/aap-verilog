@@ -250,7 +250,7 @@ module testbench;
 
 		initial begin
 			$dumpfile ("execution_tb.vcd");
-			$dumpvars (0, registerfile_tb, decoder_test, fetch_test, execution_test, TheInstructionMemory_test, TheDataMemory_test);
+			$dumpvars (0, fetch_test, decoder_test, execution_test, registerfile_tb, TheInstructionMemory_test, TheDataMemory_test);
 			clock = 0;
 			#2
 				reset = 1;

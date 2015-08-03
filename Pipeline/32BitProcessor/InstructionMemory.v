@@ -1,13 +1,33 @@
-module TheInstructionMemory (clock, reset, instruction_rd1, instruction_rd2, instruction_rd3, instruction_rd4, instruction_wr1, instruction_wr2, instruction_wr3, instruction_wr4, instruction_wr1_data, instruction_wr2_data, instruction_wr3_data, instruction_wr4_data, instruction_wr1_enable, instruction_wr2_enable, instruction_wr3_enable, instruction_wr4_enable, instruction_rd1_out, instruction_rd2_out, instruction_rd3_out, instruction_rd4_out);
+module TheInstructionMemory (	clock,
+								reset, 
+								instruction_rd1, 
+								instruction_rd2, 
+								instruction_rd3, 
+								instruction_rd4, 
+								instruction_wr1, 
+								instruction_wr2, 
+								instruction_wr3, 
+								instruction_wr4, 
+								instruction_wr1_data, 
+								instruction_wr2_data, 
+								instruction_wr3_data, 
+								instruction_wr4_data, 
+								instruction_wr1_enable, 
+								instruction_wr2_enable, 
+								instruction_wr3_enable, 
+								instruction_wr4_enable, 
+								instruction_rd1_out, 
+								instruction_rd2_out, 
+								instruction_rd3_out, 
+								instruction_rd4_out
+								);
 	
 	input clock;
 	input reset;
 
-
-// This register has five ports: three read, two write
+// This register has eight ports: four read, four Write 			?????????????????????
 
 // read inputs and outputs //
-
 
 	input  [19:00] instruction_rd1; 	                            //Which register to read from
 	input  [19:00] instruction_rd2;		                            //20 bits wide because we have up to 1048576 data
@@ -43,7 +63,6 @@ module TheInstructionMemory (clock, reset, instruction_rd1, instruction_rd2, ins
 // Registers //
 	
 	reg [15:00] instruction_memory [1048575:00]; 
-// 
 
 // Read logic //
 	
