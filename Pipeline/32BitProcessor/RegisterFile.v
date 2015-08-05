@@ -62,7 +62,6 @@ module registerfile (clock,
 	always @(posedge clock or posedge reset) begin // this is sequential, it will only happen on the clock or reset
 		if (reset) begin 	// Reset all Registers
 			$readmemb("register.list", register);
-//			$readmemb("opcodemem.list", opcodemem);
 			/*// Reset Loop //
 		        for (dataloopcount = 0; dataloopcount < 1048575; dataloopcount = dataloopcount +1) begin
 		            register[dataloopcount] = 0;

@@ -55,8 +55,8 @@ module fetch(	clock,
 				if (programcounter == previous_programcounter + pcchange -1) begin
 				//	programcounter = programcounter + 1; 				will cause to loop i think
 					fetch1 = fetch2;
-					fetch2 = instruction_rd1_out;
-				end
+					fetch2[07:00] = instruction_rd1_out[15:08];
+					fetch2[15:08] = instruction_rd1_out[07:00];				end
 				else begin
 					programcounter = programcounter + pcchange - 1;		
 					fetch1 = 0000000000000001;
@@ -67,7 +67,8 @@ module fetch(	clock,
 			if (pcjumpenable == 2) begin 										//Absolute Jump
 				if (programcounter == pclocation) begin
 					fetch1 = 0;
-					fetch2 = instruction_rd1_out;
+					fetch2[07:00] = instruction_rd1_out[15:08];
+					fetch2[15:08] = instruction_rd1_out[07:00];
 				end
 				else begin	
 					programcounter = pclocation;
@@ -79,7 +80,8 @@ module fetch(	clock,
 			if (pcjumpenable == 3) begin 										//Absolute Jump and Link
 				if (programcounter == pclocation) begin
 					fetch1 = 0;
-					fetch2 = instruction_rd1_out;
+					fetch2[07:00] = instruction_rd1_out[15:08];
+					fetch2[15:08] = instruction_rd1_out[07:00];
 				end
 				else begin	
 					programcounter = pclocation;
@@ -89,9 +91,10 @@ module fetch(	clock,
 			end
 
 			if (pcjumpenable == 4) begin 										//Relative branch and Link
-				if (programcounter == previous_programcounter + pcchange -1) begin
+				if (programcounter == previous_programcounter + pcchange - 1) begin
 					fetch1 = fetch2;
-					fetch2 = instruction_rd1_out;
+					fetch2[07:00] = instruction_rd1_out[15:08];
+					fetch2[15:08] = instruction_rd1_out[07:00];
 				end
 				else begin
 					programcounter = programcounter + pcchange - 1;		
@@ -103,7 +106,8 @@ module fetch(	clock,
 			if (pcjumpenable == 0) begin 										//Else increment program counter
 				programcounter = programcounter + 1;
 				fetch1 = fetch2;
-				fetch2 = instruction_rd1_out;
+				fetch2[07:00] = instruction_rd1_out[15:08];
+				fetch2[15:08] = instruction_rd1_out[07:00];
 				previous_programcounter = programcounter;			
 			end
 

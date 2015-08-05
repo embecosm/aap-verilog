@@ -101,6 +101,8 @@ module decoder(	fetchoutput,
 			signed_2			= fetchoutput 	[24:16];
 			signed_3			= fetchoutput	[24:16];
 			operationnumber		= opcodemem		[opcode];
+			super_duper_a = 0;
+			super_duper_b = 0;
 		end	
 	
 

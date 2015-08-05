@@ -193,14 +193,14 @@ module execution (	clock,
 			if (super_duper_a == 1) begin 	//unsigned add with carry ??
 				reg_wr1 = destination;
 				carryreg = reg_rd1_out + reg_rd2_out + carrybit;
-				reg_wr1_data = carryreg[15:00];
+				reg_wr1_data[15:00] = carryreg[15:00];
 				carrybit = carryreg[16];
 				reg_wr1_enable = 1;
 			end
 			else begin
 				reg_wr1 = destination;
-				carryreg = reg_rd1_out + reg_rd2_out + carrybit;
-				reg_wr1_data = carryreg[15:00];
+				//carryreg = reg_rd1_out + reg_rd2_out + carrybit;
+				reg_wr1_data = reg_rd1_out + reg_rd2_out;
 				reg_wr1_enable = 1;
 			end
 		end
@@ -214,8 +214,8 @@ module execution (	clock,
 			end
 			else begin
 				reg_wr1 = destination;
-				carryreg = reg_rd1_out - reg_rd2_out - carrybit;
-				reg_wr1_data = carryreg[15:00];
+				//carryreg = reg_rd1_out - reg_rd2_out - carrybit;
+				reg_wr1_data = reg_rd1_out - reg_rd2_out;
 				reg_wr1_enable = 1;
 			end
 		end
