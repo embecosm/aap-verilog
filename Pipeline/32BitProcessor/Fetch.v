@@ -52,15 +52,15 @@ module fetch(	clock,
 		else begin		
 
 			if (pcjumpenable == 1) begin 										//Relative Branch
-				if (programcounter == previous_programcounter + pcchange) begin
-				//	programcounter = programcounter + 1;
+				if (programcounter == previous_programcounter + pcchange -1) begin
+				//	programcounter = programcounter + 1; 				will cause to loop i think
 					fetch1 = fetch2;
 					fetch2 = instruction_rd1_out;
 				end
 				else begin
-					programcounter = programcounter + pcchange;		
-					fetch1 = fetch2;
-					fetch2 = instruction_rd1_out;
+					programcounter = programcounter + pcchange - 1;		
+					fetch1 = 0000000000000001;
+					fetch2 = 0000000000000001;
 				end
 			end
 
@@ -71,29 +71,32 @@ module fetch(	clock,
 				end
 				else begin	
 					programcounter = pclocation;
+					fetch1 = 0000000000000001;
+					fetch2 = 0000000000000001;
 				end
 			end
 
 			if (pcjumpenable == 3) begin 										//Absolute Jump and Link
 				if (programcounter == pclocation) begin
-					//programcounter = previous_programcounter + 1;
-					programcounter = previous_programcounter;
 					fetch1 = 0;
 					fetch2 = instruction_rd1_out;
 				end
-				else begin
+				else begin	
 					programcounter = pclocation;
+					fetch1 = 0000000000000001;
+					fetch2 = 0000000000000001;
 				end
 			end
 
 			if (pcjumpenable == 4) begin 										//Relative branch and Link
-				if (programcounter == previous_programcounter + pcchange) begin
-					programcounter = pclocation;
-					fetch1 = 0;
+				if (programcounter == previous_programcounter + pcchange -1) begin
+					fetch1 = fetch2;
 					fetch2 = instruction_rd1_out;
 				end
 				else begin
-				programcounter = programcounter + pcchange;		
+					programcounter = programcounter + pcchange - 1;		
+					fetch1 = 0;
+					fetch2 = 0;
 				end
 			end
 			
@@ -104,8 +107,8 @@ module fetch(	clock,
 				previous_programcounter = programcounter;			
 			end
 
-			if (flush == 1) begin
-				fetch1 = 0000000000000000; 	//????????????????????????????????????
+			if (flush == 1) begin 												
+				fetch1 = 0000000000000001; 	
 			end
 
 		end

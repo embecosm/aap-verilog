@@ -19,14 +19,18 @@ module decoder(	fetchoutput,
 //	Inputs & Putputs //
 
 	output [05:00]destination;
+
 	output [05:00]operationnumber;
+
 	output [05:00]source_1;
 	output [05:00]source_2;
+
 	output [05:00]unsigned_1;
 	output [15:00]unsigned_2;
 	output [08:00]unsigned_3;
 	output [09:00]unsigned_4;
 	output [08:00]unsigned_5;
+
 	output [21:00]signed_1;
 	output [15:00]signed_2;
 	output [09:00]signed_3;
@@ -141,10 +145,8 @@ module decoder(	fetchoutput,
 				super_duper_b = 0;
 			end
 
-
-
-	
 		end
+		
 	end							
 
 endmodule

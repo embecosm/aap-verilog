@@ -52,61 +52,61 @@ module execution (	clock,
 					super_duper_b
 					);
 	
-	input clock;
-	input reset;
+	input 			clock;
+	input 			reset;
 	
 	// Decoder //
 
-	input [05:00]operationnumber;
-	input [05:00]destination; 
-	input [05:00]source_2;
-	input [05:00]source_1;
-	input [08:00]unsigned_5;
-	input [09:00]unsigned_4;
-	input [08:00]unsigned_3;
-	input [15:00]unsigned_2;
-	input [05:00]unsigned_1;
-	input [21:00]signed_1;
-	input [15:00]signed_2;
-	input [09:00]signed_3;
+	input [05:00]	operationnumber;
+	input [05:00]	destination; 
+	input [05:00]	source_2;
+	input [05:00]	source_1;
+	input [08:00]	unsigned_5;
+	input [09:00]	unsigned_4;
+	input [08:00]	unsigned_3;
+	input [15:00]	unsigned_2;
+	input [05:00]	unsigned_1;
+	input [21:00]	signed_1;
+	input [15:00]	signed_2;
+	input [09:00]	signed_3;
 
-	output [08:00]pcchange;
-	output [02:00]pcjumpenable;
-	output [05:00]pclocation;
+	output [08:00]	pcchange;
+	output [02:00]	pcjumpenable;
+	output [05:00]	pclocation;
 
-	input [19:00]previous_programcounter;
+	input [19:00]	previous_programcounter;
 
-	input super_duper_a;
-	input super_duper_b;
+	input 			super_duper_a;
+	input 			super_duper_b;
 
 	// RegisterFile //
 
-	input [15:00]reg_rd1_out;
-	input [15:00]reg_rd2_out;
-	input [15:00]reg_rd3_out;
+	input [15:00]	reg_rd1_out;
+	input [15:00]	reg_rd2_out;
+	input [15:00]	reg_rd3_out;
 
-	output [05:00]reg_wr1;
-	output [05:00]reg_wr2;
-	output reg_wr1_enable;
-	output reg_wr2_enable;
-	output [15:00]reg_wr1_data;
-	output [15:00]reg_wr2_data;
+	output [05:00]	reg_wr1;
+	output [05:00]	reg_wr2;
+	output 			reg_wr1_enable;
+	output 			reg_wr2_enable;
+	output [15:00]	reg_wr1_data;
+	output [15:00]	reg_wr2_data;
 
-	output [05:00]reg_rd1;
-	output [05:00]reg_rd2;
-	output [05:00]reg_rd3;
+	output [05:00]	reg_rd1;
+	output [05:00]	reg_rd2;
+	output [05:00]	reg_rd3;
 
 	// Data Register //
 
-	input [31:00]data_rd1_out;
-	input [31:00]data_rd2_out;
-	input [31:00]data_rd3_out;
-	input [31:00]data_rd4_out;
+	input [31:00]	data_rd1_out;
+	input [31:00]	data_rd2_out;
+	input [31:00]	data_rd3_out;
+	input [31:00]	data_rd4_out;
 
-	output [08:00] data_rd1;
-	output [08:00] data_rd2;
-	output [08:00] data_rd3;
-	output [08:00] data_rd4;
+	output [08:00] 	data_rd1;
+	output [08:00] 	data_rd2;
+	output [08:00] 	data_rd3;
+	output [08:00] 	data_rd4;
 
 	output [08:00] 	data_wr1;
 	output [08:00] 	data_wr2;
@@ -182,14 +182,15 @@ module execution (	clock,
 		reg_rd2 = source_2;
 		reg_rd3 = destination;
 		pcjumpenable = 0;
-		
+
 		if (operationnumber == 0) begin 	//no operation
-			reg_wr1_enable = 0;
-			reg_wr2_enable = 0;
+			if (unsigned_2 !== 0) begin
+				
+			end
 		end
 		
 		if (operationnumber == 1) begin 	//unsigned add	
-		if (super_duper_a == 1) begin 	//unsigned add with carry ??
+			if (super_duper_a == 1) begin 	//unsigned add with carry ??
 				reg_wr1 = destination;
 				carryreg = reg_rd1_out + reg_rd2_out + carrybit;
 				reg_wr1_data = carryreg[15:00];
@@ -198,21 +199,23 @@ module execution (	clock,
 			end
 			else begin
 				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out + reg_rd2_out;
+				carryreg = reg_rd1_out + reg_rd2_out + carrybit;
+				reg_wr1_data = carryreg[15:00];
 				reg_wr1_enable = 1;
 			end
 		end
 		if (operationnumber == 2) begin 	//unsigned subtract 	
 			if (super_duper_a == 1 ) begin 	//unsigned subtract with carry ??
 				reg_wr1 = destination;
-					carryreg = reg_rd1_out - reg_rd2_out - carrybit;
+				carryreg = reg_rd1_out - reg_rd2_out - carrybit;
 				reg_wr1_data = carryreg[15:00];
-			carrybit = carryreg[16];
+				carrybit = carryreg[16];
 				reg_wr1_enable = 1;
 			end
 			else begin
 				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out - reg_rd2_out;
+				carryreg = reg_rd1_out - reg_rd2_out - carrybit;
+				reg_wr1_data = carryreg[15:00];
 				reg_wr1_enable = 1;
 			end
 		end
@@ -261,14 +264,16 @@ module execution (	clock,
 		end
 		if (operationnumber == 7) begin 	// Logical left shift
 			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out << reg_rd2_out;
+			carryreg = reg_rd1_out << reg_rd2_out; 		// ??????????????????????????????????????????????????
+			reg_wr1_data = carryreg[15:00];
 			reg_wr1_enable = 1;
 			
 		end
 
 		if (operationnumber == 8) begin 	// Logical right shift
-		reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out >> reg_rd2_out;
+			reg_wr1 = destination;
+			carryreg = reg_rd1_out >> reg_rd2_out;
+			reg_wr1_data = carryreg[15:00];
 			reg_wr1_enable = 1;
 			
 		end
@@ -281,12 +286,15 @@ module execution (	clock,
 		if (operationnumber == 10) begin 	//unsigned add immediate
 			reg_wr1 = destination;
 			reg_wr1_data = reg_rd1_out + unsigned_1;
+			carryreg = reg_rd1_out + unsigned_1 + carrybit;
+			reg_wr1_data = carryreg[15:00];
 			reg_wr1_enable = 1;
 			
 		end
 		if (operationnumber == 11) begin 	//unsigned subtract immediate
 			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out - unsigned_1;
+			carryreg = reg_rd1_out - unsigned_1 - carrybit;
+			reg_wr1_data = carryreg[15:00];
 			reg_wr1_enable = 1;
 		end
 		if (operationnumber == 12) begin 	//arithmetic shift right immediate
@@ -296,13 +304,15 @@ module execution (	clock,
 		end
 		if (operationnumber == 13) begin 	//logical shift left immediate
 			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out << unsigned_1;
+			carryreg = reg_rd1_out << unsigned_1;
+			reg_wr1_data = carryreg[15:00];
 			reg_wr1_enable = 1;	
 		end
 
 		if (operationnumber == 14) begin 	//logical shift right immediate
 			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out >> unsigned_1;
+			carryreg = reg_rd1_out >> unsigned_1;
+			reg_wr1_data = carryreg[15:00];
 			reg_wr1_enable = 1;	
 		end
 
@@ -436,6 +446,8 @@ module execution (	clock,
 		end
 		if (operationnumber == 33) begin        //relative branch and link
 			pcchange = signed_2;
+			reg_wr1 = source_1;
+			reg_wr1_data = previous_programcounter;
 			pcjumpenable = 4;
 		end
 		if (operationnumber == 34) begin        //relative branch if equal
@@ -447,6 +459,18 @@ module execution (	clock,
 
 		if (operationnumber == 35) begin        //relative branch if not equal
 			if (source_1 !== source_2) begin
+				pcchange = signed_3;
+				pcjumpenable = 1;
+			end
+		end
+		if (operationnumber == 36) begin        //relative branch if signed less than
+			if ($signed(source_1) < $signed (source_2)) begin
+				pcchange = signed_3;
+				pcjumpenable = 1;
+			end
+		end
+		if (operationnumber == 37) begin        //relative branch if signed greater than
+			if ($signed(source_1) > $signed(source_2)) begin
 				pcchange = signed_3;
 				pcjumpenable = 1;
 			end
@@ -463,65 +487,117 @@ module execution (	clock,
 				pcjumpenable = 1;
 			end
 		end
-		if (operationnumber == 38) begin        //relative branch if signed less than
-			if ($signed(source_1) < $signed (source_2)) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-		if (operationnumber == 39) begin        //relative branch if signed greater than
-			if ($signed(source_1) > $signed(source_2)) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
+		
 
 		if (operationnumber == 40) begin        //absolute jump
-			pclocation = destination;
-			pcjumpenable = 2;
+			if (super_duper_a == 1) begin 		//absolute jump long
+				pcjumpenable = 2;
+				reg_rd1 = destination;
+				pclocation = reg_rd1_out;
+			end
+			else begin
+				pclocation = destination;
+				pcjumpenable = 2;
+			end
 		end
 		if (operationnumber == 41) begin 		//absolute jump and link
-			pclocation = destination;
-			pcjumpenable = 3;
+			if (super_duper_a == 1) begin 		//absolute jump long and link
+				pcjumpenable = 2;
+				reg_rd1 = source_1;
+				pclocation = reg_rd1_out;
+				reg_wr1 = source_1;
+				reg_wr1_data = previous_programcounter;
+				reg_wr1_enable = 1;
+			end
+			else begin
+				pclocation = destination;
+				pcjumpenable = 3;
+				reg_wr1 = source_1;
+				reg_wr1_data = previous_programcounter;
+				reg_wr1_enable = 1;
+			end
 			//pclocation <= previous_programcounter;
 		end
 		if (operationnumber == 42) begin        //absolute jump if equal
-			if (source_1 == source_2) begin
-				pclocation = destination;
-				pcjumpenable = 2;
+			if (source_1 == source_2) begin 	//absolute jump long if equal
+				if (super_duper_a == 1) begin
+					pcjumpenable = 2;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
+				end
+				else begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
 			end
 		end
 		if (operationnumber == 43) begin        //absolute jump if not equal
 			if (source_1 !== source_2) begin
-				pclocation = destination;
-			pcjumpenable = 2;
+				if (super_duper_a == 1) begin
+					pcjumpenable = 2;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
+				end
+				else begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
 			end
 		end
 		if (operationnumber == 44) begin        //absolute jump if signed less than
 			if ($signed(source_1) < $signed(source_2)) begin
-				pclocation = destination;
-			pcjumpenable = 2;
+				if (super_duper_a == 1) begin
+					pcjumpenable = 2;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
+				end
+				else begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
 			end
 		end
 		if (operationnumber == 45) begin        //absolute jump if signed greater than
 			if ($signed(source_1) > $signed(source_2)) begin
-				pclocation = destination;
-				pcjumpenable = 2;
+				if (super_duper_a == 1) begin
+					pcjumpenable = 2;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
+				end
+				else begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
 			end
 		end
 
 		if (operationnumber == 46) begin        //absolute jump if unsigned less than
 			if (source_1 < source_2) begin
-				pclocation = destination;
-				pcjumpenable = 2;
+				if (super_duper_a == 1) begin
+					pcjumpenable = 2;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
 				end
+				else begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
+			end
 		end
 		if (operationnumber == 47) begin        //absolute jump if unsigned greater than
 			if (source_1 > source_2) begin
-				pclocation = destination;
-				pcjumpenable = 2;
+				if (super_duper_a == 1) begin
+					pcjumpenable = 2;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
+				end
+				else begin
+					pclocation = destination;
+					pcjumpenable = 2;
+				end
 			end
 		end
 		
 	end
+
 endmodule

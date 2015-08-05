@@ -74,6 +74,7 @@ module TheInstructionMemory (	clock,
 // Write logic //
 
 	always @(posedge clock or posedge reset) begin                  // this is sequential, it will only happen on the clock or reset
+		
 		if (reset == 1) begin
 			$readmemb("instructionmemory.list", instruction_memory);
 			/*

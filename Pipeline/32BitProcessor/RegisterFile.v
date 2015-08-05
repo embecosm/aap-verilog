@@ -1,4 +1,18 @@
-module registerfile (clock, reset, reg_rd1, reg_rd2, reg_rd3, reg_wr1, reg_wr2, reg_wr1_data, reg_wr2_data, reg_wr1_enable, reg_wr2_enable, reg_rd1_out, reg_rd2_out, reg_rd3_out);
+module registerfile (clock,
+					 reset,
+					 reg_rd1,
+					 reg_rd2, 
+					 reg_rd3, 
+					 reg_wr1, 
+					 reg_wr2, 
+					 reg_wr1_data, 
+					 reg_wr2_data, 
+					 reg_wr1_enable, 
+					 reg_wr2_enable, 
+					 reg_rd1_out, 
+					 reg_rd2_out, 
+					 reg_rd3_out
+					 );
 	
 	input clock;
 	input reset;
@@ -21,14 +35,16 @@ module registerfile (clock, reset, reg_rd1, reg_rd2, reg_rd3, reg_wr1, reg_wr2, 
 	
 	input  [05:00]reg_wr1;		//Where to write, which register
 	input  [05:00]reg_wr2;
+
 	input  [15:00]reg_wr1_data;	//What to write
 	input  [15:00]reg_wr2_data;
+
 	input reg_wr1_enable;		//Should it write
 	input reg_wr2_enable;
 
 // integers //
 
-	integer dataloopcount;
+//	integer dataloopcount;
 
 // Registers //
 	
@@ -119,7 +135,7 @@ module registerfile (clock, reset, reg_rd1, reg_rd2, reg_rd3, reg_wr1, reg_wr2, 
 			end
 
 		end
-		
+
 	end
 	/*
 	initial begin

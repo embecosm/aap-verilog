@@ -256,26 +256,11 @@ module testbench;
 				reset = 1;
 			#2
 				reset = 0;
-
 			#2
-				register[0] = 0;
-				register[1] = 3;
-				register[2] = 2;
+			//	register[0] = 0;
+			//	register[1] = 3;
+			//	register[2] = 2;
 
-		/*	reg_rd1 = 0;
-			reg_rd2 = 0;
-			reg_rd3 = 0;
-			reg_wr1 = 0;
-			reg_wr2 = 0;
-		*/	
-		/*	reg_wr1_enable = 0;
-			reg_wr2_enable = 0;
-			reg_wr1_data = 0;
-			reg_wr2_data = 0;
-			fetchoutput = 0;
-			
-		*/	
-			
 			#500
 			$finish;
 
@@ -284,4 +269,5 @@ module testbench;
 
 	always 
 		#1 clock = ~clock;
+        
 endmodule
