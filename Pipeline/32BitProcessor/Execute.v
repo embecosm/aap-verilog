@@ -192,29 +192,30 @@ module execution (	clock,
 		if (operationnumber == 1) begin 	//unsigned add	
 			if (super_duper_a == 1) begin 	//unsigned add with carry ??
 				reg_wr1 = destination;
-				carryreg = reg_rd1_out + reg_rd2_out + carrybit;
-				reg_wr1_data[15:00] = carryreg[15:00];
-				carrybit = carryreg[16];
+			//	carryreg = reg_rd1_out + reg_rd2_out + carrybit;
+			//	reg_wr1_data = carryreg[15:00];
+			//	carrybit = carryreg[16];
+				{carrybit,reg_wr1_data} = reg_rd1_out + reg_rd2_out + carrybit;
 				reg_wr1_enable = 1;
 			end
 			else begin
 				reg_wr1 = destination;
-				//carryreg = reg_rd1_out + reg_rd2_out + carrybit;
 				reg_wr1_data = reg_rd1_out + reg_rd2_out;
 				reg_wr1_enable = 1;
 			end
 		end
 		if (operationnumber == 2) begin 	//unsigned subtract 	
-			if (super_duper_a == 1 ) begin 	//unsigned subtract with carry ??
+			if (super_duper_a == 1 ) begin 	//unsigned subtract with carry ????????????
 				reg_wr1 = destination;
 				carryreg = reg_rd1_out - reg_rd2_out - carrybit;
 				reg_wr1_data = carryreg[15:00];
 				carrybit = carryreg[16];
+			//	{carrybit,reg_wr1_data} = reg_rd1_out + reg_rd2_out - carrybit;				
 				reg_wr1_enable = 1;
 			end
 			else begin
 				reg_wr1 = destination;
-				//carryreg = reg_rd1_out - reg_rd2_out - carrybit;
+				//reg_wr1_data = reg_rd1_out - reg_rd2_out - carrybit;
 				reg_wr1_data = reg_rd1_out - reg_rd2_out;
 				reg_wr1_enable = 1;
 			end
@@ -227,7 +228,7 @@ module execution (	clock,
 			end
 			else begin
 				reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out & reg_rd2_out;
+				reg_wr1_data = reg_rd1_out & reg_rd2_out;
 				reg_wr1_enable = 1;
 			end
 		end
@@ -265,6 +266,7 @@ module execution (	clock,
 		if (operationnumber == 7) begin 	// Logical left shift
 			reg_wr1 = destination;
 			carryreg = reg_rd1_out << reg_rd2_out; 		// ??????????????????????????????????????????????????
+			carrybit = carryreg[16];
 			reg_wr1_data = carryreg[15:00];
 			reg_wr1_enable = 1;
 			
@@ -273,28 +275,26 @@ module execution (	clock,
 		if (operationnumber == 8) begin 	// Logical right shift
 			reg_wr1 = destination;
 			carryreg = reg_rd1_out >> reg_rd2_out;
-			reg_wr1_data = carryreg[15:00];
+			carrybit = carryreg[0];
+			reg_wr1_data = carryreg[16:01];
 			reg_wr1_enable = 1;
 			
 		end
 		if (operationnumber == 9) begin 	// move register to register
 			reg_rd1 = source_1;
 			reg_wr1 = destination;
-		reg_wr1_data = reg_rd1_out;
+			reg_wr1_data = reg_rd1_out;
 			reg_wr1_enable = 1;
 		end
 		if (operationnumber == 10) begin 	//unsigned add immediate
 			reg_wr1 = destination;
 			reg_wr1_data = reg_rd1_out + unsigned_1;
-			carryreg = reg_rd1_out + unsigned_1 + carrybit;
-			reg_wr1_data = carryreg[15:00];
 			reg_wr1_enable = 1;
 			
 		end
 		if (operationnumber == 11) begin 	//unsigned subtract immediate
 			reg_wr1 = destination;
-			carryreg = reg_rd1_out - unsigned_1 - carrybit;
-			reg_wr1_data = carryreg[15:00];
+			reg_wr1_data = reg_rd1_out - unsigned_1;
 			reg_wr1_enable = 1;
 		end
 		if (operationnumber == 12) begin 	//arithmetic shift right immediate
@@ -304,15 +304,13 @@ module execution (	clock,
 		end
 		if (operationnumber == 13) begin 	//logical shift left immediate
 			reg_wr1 = destination;
-			carryreg = reg_rd1_out << unsigned_1;
-			reg_wr1_data = carryreg[15:00];
+			reg_wr1_data = reg_rd1_out << unsigned_1;
 			reg_wr1_enable = 1;	
 		end
 
 		if (operationnumber == 14) begin 	//logical shift right immediate
 			reg_wr1 = destination;
-			carryreg = reg_rd1_out >> unsigned_1;
-			reg_wr1_data = carryreg[15:00];
+			reg_wr1_data = reg_rd1_out >> unsigned_1;
 			reg_wr1_enable = 1;	
 		end
 
@@ -366,7 +364,7 @@ module execution (	clock,
 			reg_wr1 = destination;
 			reg_rd1 = source_1;
 			data_rd1 = (reg_rd1_out + unsigned_1);
-				reg_wr1_data = data_rd1_out;
+			reg_wr1_data = data_rd1_out;
 			reg_wr1_enable = 1;
 		end
 		if (operationnumber == 22) begin 	//indexed load word with postincrement
