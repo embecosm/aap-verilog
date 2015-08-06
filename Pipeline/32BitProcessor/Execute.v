@@ -169,6 +169,7 @@ module execution (	clock,
 
 	wire 		super_duper_a;
 	wire 		super_duper_b;
+	wire 		stop;
 
 	always @(posedge clock) begin
 
@@ -183,10 +184,14 @@ module execution (	clock,
 		reg_rd3 = destination;
 		pcjumpenable = 0;
 
+
 		if (operationnumber == 0) begin 	//no operation
-			if (unsigned_2 !== 0) begin
-				
+			if (unsigned_2 == 0) begin 	//breakpoint
+				stop = 1;
 			end
+
+
+
 		end
 		
 		if (operationnumber == 1) begin 	//unsigned add	

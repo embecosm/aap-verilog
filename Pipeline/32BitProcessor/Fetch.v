@@ -44,79 +44,83 @@ module fetch(	clock,
 	assign instruction_rd1 = programcounter;		
 
 	always @(posedge clock) begin 				// ????????????????????????
-
-		if (reset == 1) begin
-			programcounter = 0;
-		end
-
-		else begin		
-
-			if (pcjumpenable == 1) begin 										//Relative Branch
-				if (programcounter == previous_programcounter + pcchange -1) begin
-				//	programcounter = programcounter + 1; 				will cause to loop i think
-					fetch1 = fetch2;
-					fetch2[07:00] = instruction_rd1_out[15:08];
-					fetch2[15:08] = instruction_rd1_out[07:00];				end
-				else begin
-					programcounter = programcounter + pcchange - 1;		
-					fetch1 = 0000000000000001;
-					fetch2 = 0000000000000001;
-				end
-			end
-
-			if (pcjumpenable == 2) begin 										//Absolute Jump
-				if (programcounter == pclocation) begin
-					fetch1 = 0;
-					fetch2[07:00] = instruction_rd1_out[15:08];
-					fetch2[15:08] = instruction_rd1_out[07:00];
-				end
-				else begin	
-					programcounter = pclocation;
-					fetch1 = 0000000000000001;
-					fetch2 = 0000000000000001;
-				end
-			end
-
-			if (pcjumpenable == 3) begin 										//Absolute Jump and Link
-				if (programcounter == pclocation) begin
-					fetch1 = 0;
-					fetch2[07:00] = instruction_rd1_out[15:08];
-					fetch2[15:08] = instruction_rd1_out[07:00];
-				end
-				else begin	
-					programcounter = pclocation;
-					fetch1 = 0000000000000001;
-					fetch2 = 0000000000000001;
-				end
-			end
-
-			if (pcjumpenable == 4) begin 										//Relative branch and Link
-				if (programcounter == previous_programcounter + pcchange - 1) begin
-					fetch1 = fetch2;
-					fetch2[07:00] = instruction_rd1_out[15:08];
-					fetch2[15:08] = instruction_rd1_out[07:00];
-				end
-				else begin
-					programcounter = programcounter + pcchange - 1;		
-					fetch1 = 0;
-					fetch2 = 0;
-				end
-			end
+		if (stop == 0)begin
 			
-			if (pcjumpenable == 0) begin 										//Else increment program counter
-				programcounter = programcounter + 1;
-				fetch1 = fetch2;
-				fetch2[07:00] = instruction_rd1_out[15:08];
-				fetch2[15:08] = instruction_rd1_out[07:00];
-				previous_programcounter = programcounter;			
-			end
-
-			if (flush == 1) begin 												
-				fetch1 = 0000000000000001; 	
-			end
-
 		end
-		
+		else begin
+
+			if (reset == 1) begin
+				programcounter = 0;
+			end
+
+			else begin		
+
+				if (pcjumpenable == 1) begin 										//Relative Branch
+					if (programcounter == previous_programcounter + pcchange -1) begin
+					//	programcounter = programcounter + 1; 				will cause to loop i think
+						fetch1 = fetch2;
+						fetch2[07:00] = instruction_rd1_out[15:08];
+						fetch2[15:08] = instruction_rd1_out[07:00];				end
+					else begin
+						programcounter = programcounter + pcchange - 1;		
+						fetch1 = 0000000000000001;
+						fetch2 = 0000000000000001;
+					end
+				end
+
+				if (pcjumpenable == 2) begin 										//Absolute Jump
+					if (programcounter == pclocation) begin
+						fetch1 = 0;
+						fetch2[07:00] = instruction_rd1_out[15:08];
+						fetch2[15:08] = instruction_rd1_out[07:00];
+					end
+					else begin	
+						programcounter = pclocation;
+						fetch1 = 0000000000000001;
+						fetch2 = 0000000000000001;
+					end
+				end
+
+				if (pcjumpenable == 3) begin 										//Absolute Jump and Link
+					if (programcounter == pclocation) begin
+						fetch1 = 0;
+						fetch2[07:00] = instruction_rd1_out[15:08];
+						fetch2[15:08] = instruction_rd1_out[07:00];
+					end
+					else begin	
+						programcounter = pclocation;
+						fetch1 = 0000000000000001;
+						fetch2 = 0000000000000001;
+					end
+				end
+
+				if (pcjumpenable == 4) begin 										//Relative branch and Link
+					if (programcounter == previous_programcounter + pcchange - 1) begin
+						fetch1 = fetch2;
+						fetch2[07:00] = instruction_rd1_out[15:08];
+						fetch2[15:08] = instruction_rd1_out[07:00];
+					end
+					else begin
+						programcounter = programcounter + pcchange - 1;		
+						fetch1 = 0;
+						fetch2 = 0;
+					end
+				end
+				
+				if (pcjumpenable == 0) begin 										//Else increment program counter
+					programcounter = programcounter + 1;
+					fetch1 = fetch2;
+					fetch2[07:00] = instruction_rd1_out[15:08];
+					fetch2[15:08] = instruction_rd1_out[07:00];
+					previous_programcounter = programcounter;			
+				end
+
+				if (flush == 1) begin 												
+					fetch1 = 0000000000000001; 	
+				end
+
+			end
+		end
 	end
 	
 endmodule

@@ -140,7 +140,8 @@ module testbench;
 		pclocation[05:00],
         pcjumpenable[02:00],
 		previous_programcounter[19:00],
-        flush
+        flush,
+        stop
     	);
 
     execution execution_test (
@@ -195,7 +196,8 @@ module testbench;
 		pclocation[05:00],
 		previous_programcounter[19:00],
         super_duper_a,
-        super_duper_b
+        super_duper_b,
+        stop
     	);
 
     TheInstructionMemory TheInstructionMemory_test (
