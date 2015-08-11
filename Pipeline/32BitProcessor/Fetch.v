@@ -44,10 +44,6 @@ module fetch(	clock,
 	assign instruction_rd1 = programcounter;		
 
 	always @(posedge clock) begin 				// ????????????????????????
-		if (stop == 0)begin
-			
-		end
-		else begin
 
 			if (reset == 1) begin
 				programcounter = 0;
@@ -120,7 +116,7 @@ module fetch(	clock,
 				end
 
 			end
-		end
+	
 	end
 	
 endmodule

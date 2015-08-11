@@ -11,7 +11,10 @@ module registerfile (clock,
 					 reg_wr2_enable, 
 					 reg_rd1_out, 
 					 reg_rd2_out, 
-					 reg_rd3_out
+					 reg_rd3_out,
+					 carrybit,
+					 carrybit_wr,
+					 carrybit_wr_enable
 					 );
 	
 	input clock;
@@ -42,6 +45,10 @@ module registerfile (clock,
 	input reg_wr1_enable;		//Should it write
 	input reg_wr2_enable;
 
+	input carrybit_wr;
+	input carrybit_wr_enable;
+
+	output carrybit;
 // integers //
 
 //	integer dataloopcount;
@@ -49,6 +56,7 @@ module registerfile (clock,
 // Registers //
 	
 	reg [15:00] register [63:00]; 
+	reg carrybit;
 
 // Read logic //
 	
@@ -60,8 +68,10 @@ module registerfile (clock,
 // Write logic //
 
 	always @(posedge clock or posedge reset) begin // this is sequential, it will only happen on the clock or reset
+		
 		if (reset) begin 	// Reset all Registers
 			$readmemb("register.list", register);
+			carrybit  = 0;
 			/*// Reset Loop //
 		        for (dataloopcount = 0; dataloopcount < 1048575; dataloopcount = dataloopcount +1) begin
 		            register[dataloopcount] = 0;
@@ -131,6 +141,10 @@ module registerfile (clock,
 
 			if (reg_wr2_enable == 1) begin
 				register[reg_wr2] = reg_wr2_data;
+			end
+
+			if (carrybit_wr_enable == 1) begin
+				carrybit = carrybit_wr;
 			end
 
 		end

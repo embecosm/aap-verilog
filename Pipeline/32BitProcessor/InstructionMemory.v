@@ -62,7 +62,7 @@ module TheInstructionMemory (	clock,
 
 // Registers //
 	
-	reg [15:00] instruction_memory [1048575:00]; 
+	reg [15:00] instruction_memory [524288:00]; 
 
 // Read logic //
 	

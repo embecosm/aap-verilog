@@ -49,7 +49,10 @@ module execution (	clock,
 					pclocation,
 					previous_programcounter,
 					super_duper_a,
-					super_duper_b
+					super_duper_b,
+					carrybit,
+					carrybit_wr,
+					carrybit_wr_enable
 					);
 	
 	input 			clock;
@@ -78,6 +81,7 @@ module execution (	clock,
 
 	input 			super_duper_a;
 	input 			super_duper_b;
+
 
 	// RegisterFile //
 
@@ -121,6 +125,10 @@ module execution (	clock,
 	output			data_wr3_enable;
 	output 			data_wr4_enable;
 
+	output carrybit_wr;
+	output carrybit_wr_enable;
+
+	input carrybit;
 
 
 	// input [63:00]register;
@@ -158,9 +166,13 @@ module execution (	clock,
 	reg			data_wr3_enable;
 	reg 		data_wr4_enable;
 
-	reg 		carrybit;
+	wire 		carrybit;
+
 	reg [16:00] carryreg;
 
+	reg 		carrybit_wr;
+	reg 		carrybit_wr_enable;
+	
 	wire [05:00] destination;	
 
 	reg [08:00]	pcchange;
@@ -169,7 +181,7 @@ module execution (	clock,
 
 	wire 		super_duper_a;
 	wire 		super_duper_b;
-	wire 		stop;
+
 
 	always @(posedge clock) begin
 
@@ -183,25 +195,24 @@ module execution (	clock,
 		reg_rd2 = source_2;
 		reg_rd3 = destination;
 		pcjumpenable = 0;
+		carrybit_wr_enable = 0;
 
 
 		if (operationnumber == 0) begin 	//no operation
-			if (unsigned_2 == 0) begin 	//breakpoint
-				stop = 1;
-			end
-
-
-
+		//	if (unsigned_2 == 0) begin 	//breakpoint
+		//		stop = 1;
+		//	end
 		end
 		
 		if (operationnumber == 1) begin 	//unsigned add	
 			if (super_duper_a == 1) begin 	//unsigned add with carry ??
 				reg_wr1 = destination;
-			//	carryreg = reg_rd1_out + reg_rd2_out + carrybit;
-			//	reg_wr1_data = carryreg[15:00];
-			//	carrybit = carryreg[16];
-				{carrybit,reg_wr1_data} = reg_rd1_out + reg_rd2_out + carrybit;
+				carryreg = reg_rd1_out + reg_rd2_out + carrybit;
+				reg_wr1_data = carryreg[15:00];
+				carrybit_wr = carryreg[16];
+			//	{carrybit_wr,reg_wr1_data} = reg_rd1_out + reg_rd2_out + carrybit_wr;
 				reg_wr1_enable = 1;
+				carrybit_wr_enable = 1;
 			end
 			else begin
 				reg_wr1 = destination;
@@ -214,13 +225,14 @@ module execution (	clock,
 				reg_wr1 = destination;
 				carryreg = reg_rd1_out - reg_rd2_out - carrybit;
 				reg_wr1_data = carryreg[15:00];
-				carrybit = carryreg[16];
-			//	{carrybit,reg_wr1_data} = reg_rd1_out + reg_rd2_out - carrybit;				
+				carrybit_wr = carryreg[16];
+			//	{carrybit_wr,reg_wr1_data} = reg_rd1_out + reg_rd2_out - carrybit_wr;				
 				reg_wr1_enable = 1;
+				carrybit_wr_enable = 1;
 			end
 			else begin
 				reg_wr1 = destination;
-				//reg_wr1_data = reg_rd1_out - reg_rd2_out - carrybit;
+				//reg_wr1_data = reg_rd1_out - reg_rd2_out - carrybit_wr;
 				reg_wr1_data = reg_rd1_out - reg_rd2_out;
 				reg_wr1_enable = 1;
 			end
@@ -271,7 +283,7 @@ module execution (	clock,
 		if (operationnumber == 7) begin 	// Logical left shift
 			reg_wr1 = destination;
 			carryreg = reg_rd1_out << reg_rd2_out; 		// ??????????????????????????????????????????????????
-			carrybit = carryreg[16];
+			carrybit_wr = carryreg[16];
 			reg_wr1_data = carryreg[15:00];
 			reg_wr1_enable = 1;
 			
@@ -280,7 +292,7 @@ module execution (	clock,
 		if (operationnumber == 8) begin 	// Logical right shift
 			reg_wr1 = destination;
 			carryreg = reg_rd1_out >> reg_rd2_out;
-			carrybit = carryreg[0];
+			carrybit_wr = carryreg[0];
 			reg_wr1_data = carryreg[16:01];
 			reg_wr1_enable = 1;
 			
@@ -506,14 +518,15 @@ module execution (	clock,
 		if (operationnumber == 41) begin 		//absolute jump and link
 			if (super_duper_a == 1) begin 		//absolute jump long and link
 				pcjumpenable = 2;
-				reg_rd1 = source_1;
+				reg_rd1 = destination;
 				pclocation = reg_rd1_out;
 				reg_wr1 = source_1;
 				reg_wr1_data = previous_programcounter;
 				reg_wr1_enable = 1;
 			end
 			else begin
-				pclocation = destination;
+				reg_rd1 = destination;
+				pclocation = reg_rd1_out;
 				pcjumpenable = 3;
 				reg_wr1 = source_1;
 				reg_wr1_data = previous_programcounter;
@@ -529,7 +542,8 @@ module execution (	clock,
 					pclocation = reg_rd1_out;
 				end
 				else begin
-					pclocation = destination;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
 					pcjumpenable = 2;
 				end
 			end
@@ -542,7 +556,8 @@ module execution (	clock,
 					pclocation = reg_rd1_out;
 				end
 				else begin
-					pclocation = destination;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
 					pcjumpenable = 2;
 				end
 			end
@@ -555,7 +570,8 @@ module execution (	clock,
 					pclocation = reg_rd1_out;
 				end
 				else begin
-					pclocation = destination;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
 					pcjumpenable = 2;
 				end
 			end
@@ -568,7 +584,8 @@ module execution (	clock,
 					pclocation = reg_rd1_out;
 				end
 				else begin
-					pclocation = destination;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
 					pcjumpenable = 2;
 				end
 			end
@@ -582,7 +599,8 @@ module execution (	clock,
 					pclocation = reg_rd1_out;
 				end
 				else begin
-					pclocation = destination;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
 					pcjumpenable = 2;
 				end
 			end
@@ -595,7 +613,8 @@ module execution (	clock,
 					pclocation = reg_rd1_out;
 				end
 				else begin
-					pclocation = destination;
+					reg_rd1 = destination;
+					pclocation = reg_rd1_out;
 					pcjumpenable = 2;
 				end
 			end

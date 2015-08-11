@@ -87,7 +87,11 @@ module testbench;
 	wire [08:00]pcchange;
 	wire [05:00]pclocation;
 
-    wire [02:00]pcjumpenable; 
+    wire [02:00]pcjumpenable;
+
+    wire carrybit;
+    wire carrybit_wr;
+    wire carrybit_wr_enable; 
 
     reg [15:00] fetch1;
     reg [15:00] fetch2;
@@ -108,7 +112,10 @@ module testbench;
     	reg_wr2_enable, 
     	reg_rd1_out[15:00], 
     	reg_rd2_out[15:00], 
-    	reg_rd3_out[15:00]
+    	reg_rd3_out[15:00],
+        carrybit,
+        carrybit_wr,
+        carrybit_wr_enable
     	);
 
     decoder decoder_test (
@@ -140,8 +147,7 @@ module testbench;
 		pclocation[05:00],
         pcjumpenable[02:00],
 		previous_programcounter[19:00],
-        flush,
-        stop
+        flush
     	);
 
     execution execution_test (
@@ -197,8 +203,10 @@ module testbench;
 		previous_programcounter[19:00],
         super_duper_a,
         super_duper_b,
-        stop
-    	);
+        carrybit,
+        carrybit_wr,
+        carrybit_wr_enable
+        );
 
     TheInstructionMemory TheInstructionMemory_test (
     	clock, 

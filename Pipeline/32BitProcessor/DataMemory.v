@@ -39,7 +39,7 @@ module TheDataMemory (clock, reset, data_rd1, data_rd2, data_rd3, data_rd4, data
 
 // Registers //
 	
-	reg [31:00] data_memory [1048575:00]; 
+	reg [31:00] data_memory [524288:00]; 
 
 // Reset Loop //
 
