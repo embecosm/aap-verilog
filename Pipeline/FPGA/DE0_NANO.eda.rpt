@@ -1,0 +1,108 @@
+EDA Netlist Writer report for DE0_NANO
+Tue Aug 11 09:26:42 2015
+Quartus II 64-Bit Version 15.0.0 Build 145 04/22/2015 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. EDA Netlist Writer Summary
+  3. Simulation Settings
+  4. Simulation Generated Files
+  5. EDA Netlist Writer Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2015 Altera Corporation. All rights reserved.
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, the Altera Quartus II License Agreement,
+the Altera MegaCore Function License Agreement, or other 
+applicable license agreement, including, without limitation, 
+that your use is for the sole purpose of programming logic 
+devices manufactured by Altera and sold by Altera or its 
+authorized distributors.  Please refer to the applicable 
+agreement for further details.
+
+
+
++-------------------------------------------------------------------+
+; EDA Netlist Writer Summary                                        ;
++---------------------------+---------------------------------------+
+; EDA Netlist Writer Status ; Successful - Tue Aug 11 09:26:42 2015 ;
+; Revision Name             ; DE0_NANO                              ;
+; Top-level Entity Name     ; DE0_NANO                              ;
+; Family                    ; Cyclone IV E                          ;
+; Simulation Files Creation ; Successful                            ;
++---------------------------+---------------------------------------+
+
+
++-------------------------------------------------------------------------------------------------------------------------------+
+; Simulation Settings                                                                                                           ;
++---------------------------------------------------------------------------------------------------+---------------------------+
+; Option                                                                                            ; Setting                   ;
++---------------------------------------------------------------------------------------------------+---------------------------+
+; Tool Name                                                                                         ; ModelSim-Altera (Verilog) ;
+; Generate netlist for functional simulation only                                                   ; Off                       ;
+; Time scale                                                                                        ; 1 ps                      ;
+; Truncate long hierarchy paths                                                                     ; Off                       ;
+; Map illegal HDL characters                                                                        ; Off                       ;
+; Flatten buses into individual nodes                                                               ; Off                       ;
+; Maintain hierarchy                                                                                ; Off                       ;
+; Bring out device-wide set/reset signals as ports                                                  ; Off                       ;
+; Enable glitch filtering                                                                           ; Off                       ;
+; Do not write top level VHDL entity                                                                ; Off                       ;
+; Disable detection of setup and hold time violations in the input registers of bi-directional pins ; Off                       ;
+; Architecture name in VHDL output netlist                                                          ; structure                 ;
+; Generate third-party EDA tool command script for RTL functional simulation                        ; Off                       ;
+; Generate third-party EDA tool command script for gate-level simulation                            ; Off                       ;
++---------------------------------------------------------------------------------------------------+---------------------------+
+
+
++------------------------------------------------------------------------------------+
+; Simulation Generated Files                                                         ;
++------------------------------------------------------------------------------------+
+; Generated Files                                                                    ;
++------------------------------------------------------------------------------------+
+; /home/dan/Documents/aap/fpga/simulation/modelsim/DE0_NANO_6_1200mv_85c_slow.vo     ;
+; /home/dan/Documents/aap/fpga/simulation/modelsim/DE0_NANO_6_1200mv_0c_slow.vo      ;
+; /home/dan/Documents/aap/fpga/simulation/modelsim/DE0_NANO_min_1200mv_0c_fast.vo    ;
+; /home/dan/Documents/aap/fpga/simulation/modelsim/DE0_NANO.vo                       ;
+; /home/dan/Documents/aap/fpga/simulation/modelsim/DE0_NANO_6_1200mv_85c_v_slow.sdo  ;
+; /home/dan/Documents/aap/fpga/simulation/modelsim/DE0_NANO_6_1200mv_0c_v_slow.sdo   ;
+; /home/dan/Documents/aap/fpga/simulation/modelsim/DE0_NANO_min_1200mv_0c_v_fast.sdo ;
+; /home/dan/Documents/aap/fpga/simulation/modelsim/DE0_NANO_v.sdo                    ;
++------------------------------------------------------------------------------------+
+
+
++-----------------------------+
+; EDA Netlist Writer Messages ;
++-----------------------------+
+Info: *******************************************************************
+Info: Running Quartus II 64-Bit EDA Netlist Writer
+    Info: Version 15.0.0 Build 145 04/22/2015 SJ Web Edition
+    Info: Processing started: Tue Aug 11 09:26:41 2015
+Info: Command: quartus_eda --read_settings_files=off --write_settings_files=off DE0_NANO -c DE0_NANO
+Info (204019): Generated file DE0_NANO_6_1200mv_85c_slow.vo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
+Info (204019): Generated file DE0_NANO_6_1200mv_0c_slow.vo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
+Info (204019): Generated file DE0_NANO_min_1200mv_0c_fast.vo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
+Info (204019): Generated file DE0_NANO.vo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
+Info (204019): Generated file DE0_NANO_6_1200mv_85c_v_slow.sdo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
+Info (204019): Generated file DE0_NANO_6_1200mv_0c_v_slow.sdo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
+Info (204019): Generated file DE0_NANO_min_1200mv_0c_v_fast.sdo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
+Info (204019): Generated file DE0_NANO_v.sdo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
+Info: Quartus II 64-Bit EDA Netlist Writer was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 1188 megabytes
+    Info: Processing ended: Tue Aug 11 09:26:42 2015
+    Info: Elapsed time: 00:00:01
+    Info: Total CPU time (on all processors): 00:00:01
+
+
