@@ -7,7 +7,8 @@ module fetch(	clock,
 				pclocation,
 				pcjumpenable, 
 				previous_programcounter,
-				flush
+				flush,
+				stop
 				);
 
 	output [19:00]instruction_rd1;
@@ -15,6 +16,7 @@ module fetch(	clock,
 	output [19:00]previous_programcounter;
 
 	input clock;
+	input stop;
 	input reset;
 	input [15:00]instruction_rd1_out;
 	
@@ -26,6 +28,7 @@ module fetch(	clock,
 
 	wire clock;
 	wire reset;
+	wire stop;
 
 	wire [31:00] fetchoutput;
 
@@ -44,6 +47,7 @@ module fetch(	clock,
 	assign instruction_rd1 = programcounter;		
 
 	always @(posedge clock) begin 				// ????????????????????????
+		if (stop !== 1) begin
 
 			if (reset == 1) begin
 				programcounter = 0;
@@ -116,6 +120,7 @@ module fetch(	clock,
 				end
 
 			end
+		end
 	
 	end
 	
