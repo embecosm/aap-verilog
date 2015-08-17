@@ -4,11 +4,14 @@ module registerfile (clock,
 							reg_rd2, 
 							reg_rd3, 
 							reg_wr1, 
-							reg_wr2, 
+							reg_wr2,
+							reg_wr3,
 							reg_wr1_data, 
-							reg_wr2_data, 
+							reg_wr2_data,
+							reg_wr3_data,
 							reg_wr1_enable, 
-							reg_wr2_enable, 
+							reg_wr2_enable,
+							reg_wr3_enable,
 							reg_rd1_out, 
 							reg_rd2_out, 
 							reg_rd3_out,
@@ -38,12 +41,15 @@ module registerfile (clock,
 	
 	input  [05:00]reg_wr1;		//Where to write, which register
 	input  [05:00]reg_wr2;
+	input  [05:00]reg_wr3;
 
 	input  [15:00]reg_wr1_data;	//What to write
 	input  [15:00]reg_wr2_data;
-
+	input  [15:00]reg_wr3_data;
+	
 	input reg_wr1_enable;		//Should it write
 	input reg_wr2_enable;
+	input reg_wr3_enable;
 	
 	input carrybit_wr; 			//what bit should be
 	input carrybit_wr_enable;	//should you write the bit?
@@ -144,6 +150,10 @@ module registerfile (clock,
 
 			if (reg_wr2_enable == 1) begin
 				register[reg_wr2] = reg_wr2_data;
+			end
+
+			if (reg_wr3_enable == 1) begin
+				register[reg_wr3] = reg_wr3_data;
 			end
 			
 			if (carrybit_wr_enable == 1) begin

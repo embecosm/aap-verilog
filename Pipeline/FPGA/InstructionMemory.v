@@ -29,10 +29,10 @@ module TheInstructionMemory (	clock,
 
 // read inputs and outputs //
 
-	input  [19:00] instruction_rd1; 	                            //Which register to read from
-	input  [19:00] instruction_rd2;		                            //20 bits wide because we have up to 1048576 data
-	input  [19:00] instruction_rd3;
-	input  [19:00] instruction_rd4;				
+	input  [05:00] instruction_rd1; 	                            //Which register to read from
+	input  [05:00] instruction_rd2;		                            //20 bits wide because we have up to 1048576 data
+	input  [05:00] instruction_rd3;
+	input  [05:00] instruction_rd4;				
 
 	output [15:00] instruction_rd1_out;                         	//What is in that register
 	output [15:00] instruction_rd2_out;
@@ -41,10 +41,10 @@ module TheInstructionMemory (	clock,
 
 // write inputs and outputs //
 	
-	input  [19:00] instruction_wr1;	                               	//Where to write, which register
-	input  [19:00] instruction_wr2;
-	input  [19:00] instruction_wr3;	                               	//Where to write, which register
-	input  [19:00] instruction_wr4;
+	input  [05:00] instruction_wr1;	                               	//Where to write, which register
+	input  [05:00] instruction_wr2;
+	input  [05:00] instruction_wr3;	                               	//Where to write, which register
+	input  [05:00] instruction_wr4;
 
 	input  [15:00] instruction_wr1_data;	                        //What to write
 	input  [15:00] instruction_wr2_data;
@@ -62,7 +62,7 @@ module TheInstructionMemory (	clock,
 
 // Registers //
 	
-	reg [15:00] instruction_memory [128:00]; 
+	reg [15:00] instruction_memory [63:00]; 
 
 // Read logic //
 	
@@ -78,8 +78,8 @@ module TheInstructionMemory (	clock,
 		if (reset == 1) begin
 //			$readmemb("instructionmemory.list", instruction_memory);
 			
-			for (instructionloopcount = 0; instructionloopcount < 128; instructionloopcount = instructionloopcount +1) begin
-				instruction_memory[instructionloopcount] = 0;
+			for (instructionloopcount = 0; instructionloopcount < 64; instructionloopcount = instructionloopcount +1) begin
+				instruction_memory[instructionloopcount] = 0000000100000000;
 			end
 	
 		end

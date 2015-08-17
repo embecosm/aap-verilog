@@ -22,8 +22,8 @@ module DE0_NANO(
 	KEY,
 
 	//////////// SW //////////
-	SW,
-
+//	SW,
+/*
 	//////////// SDRAM //////////
 	DRAM_ADDR,
 	DRAM_BA,
@@ -64,7 +64,13 @@ module DE0_NANO(
 
 	//////////// GPIO_1, GPIO_1 connect to GPIO Default //////////
 	gpio_1,
-	gpio_1_IN 
+	gpio_1_IN,
+*/	
+	/////////// UART /////////////
+	UART_TX,
+	UART_GND,
+	UART_RX
+
 );
 
 //=======================================================
@@ -86,8 +92,8 @@ module DE0_NANO(
 	input 		     [1:0]		KEY;
 
 	//////////// SW //////////
-	input 		     [3:0]		SW;
-
+//	input 		     [3:0]		SW;
+/*
 	//////////// SDRAM //////////
 	output		    [12:0]		DRAM_ADDR;
 	output		     [1:0]		DRAM_BA;
@@ -129,7 +135,11 @@ module DE0_NANO(
 	//////////// GPIO_1, GPIO_1 connect to GPIO Default //////////
 	inout 		    [33:0]		gpio_1;
 	input 		     [1:0]		gpio_1_IN;
-
+*/
+	/////////// UART //////////////
+	output 	                  UART_TX;
+   output                     UART_GND;
+   input		  						UART_RX;
 
 //=======================================================
 //  REG/WIRE declarations
@@ -166,6 +176,10 @@ module DE0_NANO(
 	wire [15:00] reg_wr2_data;
 	wire 		 reg_wr2_enable;
 
+	wire [05:00] reg_wr3;
+	wire [15:00] reg_wr3_data;
+	wire 		 reg_wr3_enable;
+
 	wire [08:00] data_wr1;
 	wire [31:00] data_wr1_data;
 	wire		 data_wr1_enable;
@@ -201,10 +215,10 @@ module DE0_NANO(
    wire [09:00] unsigned_4;
    wire [08:00] unsigned_5;
 
-   wire [19:00] instruction_rd1;
-   wire [19:00] instruction_rd2;
-	wire [19:00] instruction_rd3;
-	wire [19:00] instruction_rd4;
+   wire [05:00] instruction_rd1;
+   wire [05:00] instruction_rd2;
+	wire [05:00] instruction_rd3;
+	wire [05:00] instruction_rd4;
 	wire [15:00] instruction_rd1_out;
 	wire [15:00] instruction_rd2_out;
 	wire [15:00] instruction_rd3_out;
@@ -220,35 +234,38 @@ module DE0_NANO(
 
 	 
 	wire [19:00] previous_programcounter;
+	
+//	wire		UART_TX;
+	wire		UART_GND;
+	wire 		UART_RX;
 
 
 //=======================================================
 //  Structural coding
 //=======================================================
 
-
 	// Instantiate the instruction memory
 	TheInstructionMemory i_TheInstructionMemory 	(	.clock           (CLOCK_50),
 																	.reset           (myreset),
 																	.instruction_rd1 (instruction_rd1),
-																/*	.instruction_rd2 (instruction_rd2),
-																	.instruction_rd3 (instruction_rd3),
+																	.instruction_rd2 (instruction_rd2),
+																/*	.instruction_rd3 (instruction_rd3),
 																	.instruction_rd4 (instruction_rd4),
 																*/	.instruction_wr1 (instruction_wr1),
-																/*	.instruction_wr2 (instruction_wr2),
-																	.instruction_wr3 (instruction_wr3),
+																	.instruction_wr2 (instruction_wr2),
+																/*	.instruction_wr3 (instruction_wr3),
 																	.instruction_wr4 (instruction_wr4),
 																*/	.instruction_wr1_data (instruction_wr1_data),
-																/*	.instruction_wr2_data (instruction_wr2_data),
-																	.instruction_wr3_data (instruction_wr3_data),
+																	.instruction_wr2_data (instruction_wr2_data),
+																/*	.instruction_wr3_data (instruction_wr3_data),
 																	.instruction_wr4_data (instruction_wr4_data),
 																*/	.instruction_wr1_enable (instruction_wr1_enable),
-																/*	.instruction_wr2_enable (instruction_wr2_enable),
-																	.instruction_wr3_enable (instruction_wr3_enable),
+																	.instruction_wr2_enable (instruction_wr2_enable),
+																/*	.instruction_wr3_enable (instruction_wr3_enable),
 																	.instruction_wr4_enable (instruction_wr4_enable),
-																*/	.instruction_rd1_out (instruction_rd1_out)
-																/*	.instruction_rd2_out (instruction_rd2_out),
-																	.instruction_rd3_out (instruction_rd3_out),
+																*/	.instruction_rd1_out (instruction_rd1_out),
+																	.instruction_rd2_out (instruction_rd2_out)
+																/*	.instruction_rd3_out (instruction_rd3_out),
 																	.instruction_rd4_out (instruction_rd4_out)
 																*/
 																);
@@ -264,10 +281,13 @@ module DE0_NANO(
 																	.reg_rd3_out (reg_rd3_out),
 																	.reg_wr1 (reg_wr1),
 																	.reg_wr2 (reg_wr2),
+																	.reg_wr3 (reg_wr3),
 																	.reg_wr1_data (reg_wr1_data),
 																	.reg_wr2_data (reg_wr2_data),
+																	.reg_wr3_data (reg_wr3_data),
 																	.reg_wr1_enable (reg_wr1_enable),
 																	.reg_wr2_enable (reg_wr2_enable),
+																	.reg_wr3_enable (reg_wr3_enable),
 																	.carrybit (carrybit),
 																	.carrybit_wr (carrybit_wr),
 																	.carrybit_wr_enable (carrybit_wr_enable)
@@ -363,10 +383,10 @@ module DE0_NANO(
 																	.data_wr4_enable (data_wr4_enable),
 																	.reg_rd1 (reg_rd1),
 																	.reg_rd2 (reg_rd2),
-																	.reg_rd3 (reg_rd3),
+																	//.reg_rd3 (reg_rd3),
 																	.reg_rd1_out (reg_rd1_out),
 																	.reg_rd2_out (reg_rd2_out),
-																	.reg_rd3_out (reg_rd3_out),
+																	//.reg_rd3_out (reg_rd3_out),
 																	.reg_wr1 (reg_wr1),
 																	.reg_wr2 (reg_wr2),
 																	.reg_wr1_data (reg_wr1_data),
@@ -374,10 +394,29 @@ module DE0_NANO(
 																	.reg_wr1_enable (reg_wr1_enable),
 																	.reg_wr2_enable (reg_wr2_enable),
 																	.previous_programcounter (previous_programcounter),
-																	.LED (LED),
+															//		.LED (LED),
 																	.carrybit (carrybit),
 																	.carrybit_wr (carrybit_wr),
 																	.carrybit_wr_enable (carrybit_wr_enable)
+																);
+																
+	//Instantiate the uart
+	uart						i_uart						(	.clock (CLOCK_50),
+																	.reset (myreset),
+																	.UART_TX (UART_TX),
+																	.UART_GND (UART_GND),
+																	.UART_RX	(UART_RX),
+																	.reg_rd3 (reg_rd3),
+																	.reg_rd3_out (reg_rd3_out),
+																	.LED (LED),
+																	.reg_wr3 (reg_wr3),
+																	.reg_wr3_data (reg_wr3_data),
+																	.reg_wr3_enable (reg_wr3_enable),
+																	.instruction_rd2 (instruction_rd2),
+																	.instruction_rd2_out (instruction_rd2_out),
+																	.instruction_wr2 (instruction_wr2),
+																	.instruction_wr2_data (instruction_wr2_data),
+																	.instruction_wr2_enable (instruction_wr2_enable)
 																);
 																	
 																							 

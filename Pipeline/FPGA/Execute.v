@@ -1,5 +1,6 @@
 module execution (	clock, 
 					reset,
+					stop,
 					operationnumber,
 					destination,
 					source_1,
@@ -14,7 +15,7 @@ module execution (	clock,
 					signed_1,
 					reg_rd1,
 					reg_rd2, 
-					reg_rd3, 
+					//reg_rd3, 
 					reg_wr1, 
 					reg_wr2, 
 					reg_wr1_data, 
@@ -23,7 +24,7 @@ module execution (	clock,
 					reg_wr2_enable, 
 					reg_rd1_out, 
 					reg_rd2_out, 
-					reg_rd3_out,
+					//reg_rd3_out,
 					data_rd1, 
 					data_rd2, 
 					data_rd3, 
@@ -53,23 +54,25 @@ module execution (	clock,
 					carrybit,
 					carrybit_wr,
 					carrybit_wr_enable,
-					LED
+					//LED
 					);
 	
 	input 			clock;
 	input 			reset;
 	
+	output			stop;
+	
 	// Decoder //
 
 	
-	output		     [7:0]		LED;
-	reg [07:00] ledscount;
+	//output		     [7:0]		LED;
+	//reg [07:00] ledscount;
 	
-	assign LED [07:00] = ~ledscount[07:00];
+	//assign LED [07:00] = ~ledscount[07:00];
 	
-	always @(posedge clock) begin
-		ledscount = operationnumber;
-	end
+//	always @(posedge clock) begin
+//		ledscount = operationnumber;
+//	end
 	
 	input [05:00]	operationnumber;
 	input [05:00]	destination; 
@@ -98,7 +101,7 @@ module execution (	clock,
 
 	input [15:00]	reg_rd1_out;
 	input [15:00]	reg_rd2_out;
-	input [15:00]	reg_rd3_out;
+	//input [15:00]	reg_rd3_out;
 
 	output [05:00]	reg_wr1;
 	output [05:00]	reg_wr2;
@@ -109,7 +112,7 @@ module execution (	clock,
 
 	output [05:00]	reg_rd1;
 	output [05:00]	reg_rd2;
-	output [05:00]	reg_rd3;
+	//output [05:00]	reg_rd3;
 
 	// Data Register //
 
@@ -149,7 +152,7 @@ module execution (	clock,
 
 	reg [05:00]	reg_rd1;
 	reg [05:00]	reg_rd2;
-	reg [05:00]	reg_rd3;
+	//reg [05:00]	reg_rd3;
 
 	reg 		reg_wr1_enable;
 	reg 		reg_wr2_enable;
@@ -192,6 +195,8 @@ module execution (	clock,
 
 	wire 		super_duper_a;
 	wire 		super_duper_b;
+	
+	reg stop;
 
 
 	always @(posedge clock) begin
@@ -204,15 +209,15 @@ module execution (	clock,
 		data_wr4_enable = 0;
 		reg_rd1 = source_1;
 		reg_rd2 = source_2;
-		reg_rd3 = destination;
+	//	reg_rd3 = destination;
 		pcjumpenable = 0;
 		carrybit_wr_enable = 0;
 
 
 		if (operationnumber == 0) begin 	//no operation
-		//	if (unsigned_2 == 0) begin 	//breakpoint
-		//		stop = 1;
-		//	end
+			if (unsigned_2 == 0) begin 	//breakpoint
+				stop = 1;
+			end
 		end
 		
 		if (operationnumber == 1) begin 	//unsigned add	

@@ -1,5 +1,5 @@
 EDA Netlist Writer report for DE0_NANO
-Tue Aug 11 09:26:42 2015
+Mon Aug 17 10:06:53 2015
 Quartus II 64-Bit Version 15.0.0 Build 145 04/22/2015 SJ Web Edition
 
 
@@ -37,7 +37,7 @@ agreement for further details.
 +-------------------------------------------------------------------+
 ; EDA Netlist Writer Summary                                        ;
 +---------------------------+---------------------------------------+
-; EDA Netlist Writer Status ; Successful - Tue Aug 11 09:26:42 2015 ;
+; EDA Netlist Writer Status ; Successful - Mon Aug 17 10:06:53 2015 ;
 ; Revision Name             ; DE0_NANO                              ;
 ; Top-level Entity Name     ; DE0_NANO                              ;
 ; Family                    ; Cyclone IV E                          ;
@@ -89,7 +89,7 @@ agreement for further details.
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit EDA Netlist Writer
     Info: Version 15.0.0 Build 145 04/22/2015 SJ Web Edition
-    Info: Processing started: Tue Aug 11 09:26:41 2015
+    Info: Processing started: Mon Aug 17 10:06:52 2015
 Info: Command: quartus_eda --read_settings_files=off --write_settings_files=off DE0_NANO -c DE0_NANO
 Info (204019): Generated file DE0_NANO_6_1200mv_85c_slow.vo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
 Info (204019): Generated file DE0_NANO_6_1200mv_0c_slow.vo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
@@ -100,9 +100,9 @@ Info (204019): Generated file DE0_NANO_6_1200mv_0c_v_slow.sdo in folder "/home/d
 Info (204019): Generated file DE0_NANO_min_1200mv_0c_v_fast.sdo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
 Info (204019): Generated file DE0_NANO_v.sdo in folder "/home/dan/Documents/aap/fpga/simulation/modelsim/" for EDA simulation tool
 Info: Quartus II 64-Bit EDA Netlist Writer was successful. 0 errors, 0 warnings
-    Info: Peak virtual memory: 1188 megabytes
-    Info: Processing ended: Tue Aug 11 09:26:42 2015
+    Info: Peak virtual memory: 1196 megabytes
+    Info: Processing ended: Mon Aug 17 10:06:53 2015
     Info: Elapsed time: 00:00:01
-    Info: Total CPU time (on all processors): 00:00:01
+    Info: Total CPU time (on all processors): 00:00:02
 
 
