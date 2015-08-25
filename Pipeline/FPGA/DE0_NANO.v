@@ -145,7 +145,7 @@ module DE0_NANO(
 //  REG/WIRE declarations
 //=======================================================
 
-	reg myreset;
+	wire myreset;
 
 	wire [05:00] reg_rd1;
 	wire [05:00] reg_rd2;
@@ -172,6 +172,14 @@ module DE0_NANO(
 	wire [15:00] reg_wr1_data;
 	wire 		 reg_wr1_enable;
 
+	wire [05:00] instruction_wr1;
+	wire [15:00] instruction_wr1_data;
+	wire instruction_wr1_enable;
+	
+	wire [05:00] instruction_wr2;
+	wire [15:00] instruction_wr2_data;
+	wire instruction_wr2_enable;
+	
 	wire [05:00] reg_wr2;
 	wire [15:00] reg_wr2_data;
 	wire 		 reg_wr2_enable;
@@ -232,6 +240,11 @@ module DE0_NANO(
     reg [15:00] fetch1;
     reg [15:00] fetch2;
 
+	wire uart_reset;
+	wire uart_stop;
+	wire uart_continue;
+	wire uart_step_enable;
+	wire [04:00] uart_step_volume;
 	 
 	wire [19:00] previous_programcounter;
 	
@@ -248,26 +261,16 @@ module DE0_NANO(
 	TheInstructionMemory i_TheInstructionMemory 	(	.clock           (CLOCK_50),
 																	.reset           (myreset),
 																	.instruction_rd1 (instruction_rd1),
+																	.instruction_wr1 (instruction_wr1),
+																	.instruction_wr1_data (instruction_wr1_data),
+																	.instruction_wr1_enable (instruction_wr1_enable),
+																	.instruction_rd1_out (instruction_rd1_out),
 																	.instruction_rd2 (instruction_rd2),
-																/*	.instruction_rd3 (instruction_rd3),
-																	.instruction_rd4 (instruction_rd4),
-																*/	.instruction_wr1 (instruction_wr1),
 																	.instruction_wr2 (instruction_wr2),
-																/*	.instruction_wr3 (instruction_wr3),
-																	.instruction_wr4 (instruction_wr4),
-																*/	.instruction_wr1_data (instruction_wr1_data),
 																	.instruction_wr2_data (instruction_wr2_data),
-																/*	.instruction_wr3_data (instruction_wr3_data),
-																	.instruction_wr4_data (instruction_wr4_data),
-																*/	.instruction_wr1_enable (instruction_wr1_enable),
 																	.instruction_wr2_enable (instruction_wr2_enable),
-																/*	.instruction_wr3_enable (instruction_wr3_enable),
-																	.instruction_wr4_enable (instruction_wr4_enable),
-																*/	.instruction_rd1_out (instruction_rd1_out),
 																	.instruction_rd2_out (instruction_rd2_out)
-																/*	.instruction_rd3_out (instruction_rd3_out),
-																	.instruction_rd4_out (instruction_rd4_out)
-																*/
+																
 																);
 															
 	// Instantiate the RegisterFile
@@ -319,6 +322,7 @@ module DE0_NANO(
 	// Instantiate the fetch unit
 	fetch 					i_fetch 						(	.clock (CLOCK_50),
 																	.reset (myreset),
+																	.nop_stop (nop_stop),
 																	.instruction_rd1 (instruction_rd1),
 																	.instruction_rd1_out (instruction_rd1_out),
 																	.fetchoutput (fetchoutput),
@@ -326,7 +330,14 @@ module DE0_NANO(
 																	.pclocation (pclocation),
 																	.pcjumpenable (pcjumpenable),
 																	.previous_programcounter (previous_programcounter),
-																	.flush (flush)
+																	.programcounter (programcounter),
+																	.flush (flush),
+																	.LED (LED),
+																	.uart_stop (uart_stop),
+																	.uart_continue (uart_continue),
+																	.uart_step_enable (uart_step_enable),
+																	.uart_step_volume (uart_step_volume),
+																	.uart_reset (uart_reset)
 																);
 	// Instantiate the decoder
 	decoder					i_decoder					( 	.fetchoutput (fetchoutput),
@@ -348,6 +359,7 @@ module DE0_NANO(
 	// Instantiate the execute
 	execution				i_execuition				(	.clock (CLOCK_50),
 																	.reset (myreset),
+																	.nop_stop (nop_stop),
 																	.destination (destination),
 																	.operationnumber (operationnumber),
 																	.source_1 (source_1),
@@ -363,23 +375,18 @@ module DE0_NANO(
 																	.super_duper_b (super_duper_b),
 																	.data_rd1 (data_rd1),
 																	.data_rd2 (data_rd2),
-																	.data_rd3 (data_rd3),
 																	.data_rd4 (data_rd4),
 																	.data_rd1_out (data_rd1_out),
 																	.data_rd2_out (data_rd2_out),
-																	.data_rd3_out (data_rd3_out),
 																	.data_rd4_out (data_rd4_out),
 																	.data_wr1 (data_wr1),
 																	.data_wr2 (data_wr2),
-																	.data_wr3 (data_wr3),
 																	.data_wr4 (data_wr4),
 																	.data_wr1_data (data_wr1_data),
 																	.data_wr2_data (data_wr2_data),
-																	.data_wr3_data (data_wr3_data),
 																	.data_wr4_data (data_wr4_data),
 																	.data_wr1_enable (data_wr1_enable),
 																	.data_wr2_enable (data_wr2_enable),
-																	.data_wr3_enable (data_wr3_enable),
 																	.data_wr4_enable (data_wr4_enable),
 																	.reg_rd1 (reg_rd1),
 																	.reg_rd2 (reg_rd2),
@@ -408,7 +415,7 @@ module DE0_NANO(
 																	.UART_RX	(UART_RX),
 																	.reg_rd3 (reg_rd3),
 																	.reg_rd3_out (reg_rd3_out),
-																	.LED (LED),
+																	//.LED (LED),
 																	.reg_wr3 (reg_wr3),
 																	.reg_wr3_data (reg_wr3_data),
 																	.reg_wr3_enable (reg_wr3_enable),
@@ -416,8 +423,23 @@ module DE0_NANO(
 																	.instruction_rd2_out (instruction_rd2_out),
 																	.instruction_wr2 (instruction_wr2),
 																	.instruction_wr2_data (instruction_wr2_data),
-																	.instruction_wr2_enable (instruction_wr2_enable)
+																	.instruction_wr2_enable (instruction_wr2_enable),
+																	.data_rd3 (data_rd3),
+																	.data_rd3_out (data_rd3_out),
+																	.data_wr3 (data_wr3),
+																	.data_wr3_data (data_wr3_data),
+																	.data_wr3_enable (data_wr3_enable),																	
+																	.previous_programcounter (previous_programcounter),
+																	.programcounter (programcounter),
+																	.uart_stop (uart_stop),
+																	.uart_continue (uart_continue),
+																	.uart_step_enable (uart_step_enable),
+																	.uart_step_volume (uart_step_volume),
+																	.uart_reset (uart_reset)
+
 																);
+																
+																
 																	
 																							 
 endmodule

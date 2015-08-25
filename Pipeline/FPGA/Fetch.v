@@ -1,5 +1,6 @@
 module fetch(	clock,
-				reset, 
+				reset,
+				nop_stop, 
 				instruction_rd1, 
 				instruction_rd1_out, 
 				fetchoutput,
@@ -7,28 +8,43 @@ module fetch(	clock,
 				pclocation,
 				pcjumpenable, 
 				previous_programcounter,
+				programcounter,
 				flush,
-				stop
+				LED,
+				uart_stop,
+				uart_continue,
+				uart_step_enable,
+				uart_step_volume,
+				uart_reset
 				);
 
 	output [19:00]instruction_rd1;
 	output [31:00]fetchoutput;
-	output [19:00]previous_programcounter;
+	output [06:00]previous_programcounter;
+	output [06:00]programcounter;
 
 	input clock;
-	input reset;
-	input stop;
+	output reg reset;
+	input nop_stop;
 	input [15:00]instruction_rd1_out;
+	
+	input uart_step_enable;
+	input uart_step_volume;
+	
+	input uart_stop;
+	input uart_continue;
+	input uart_reset;
 	
 	input [08:00]pcchange;
 	input [05:00]pclocation;
 	input [02:00]pcjumpenable;
 
 	input flush;
-
+	
+	output [07:00] LED;
+	
 	wire clock;
-	wire reset;
-	wire stop;
+	reg stop;
 
 	wire [31:00] fetchoutput;
 
@@ -38,23 +54,60 @@ module fetch(	clock,
 	wire [15:00] instruction_rd1_out;
 	wire [19:00] instruction_rd1;
 
-	reg [19:00]programcounter;
-	reg [19:00]previous_programcounter;
+	reg [06:00]programcounter;
+	reg [06:00]previous_programcounter;
+	
+	reg [05:00] uart_step_counter;
 
 	assign fetchoutput [31:16] = fetch1;
 	assign fetchoutput [15:00] = fetch2;
 
-	assign instruction_rd1 = programcounter;		
+	assign instruction_rd1 = programcounter;
+	assign LED[07:00] = fetchoutput[21:16];	
 
-	always @(posedge clock) begin 				// ????????????????????????
-		if (stop !== 1) begin
+	always @(posedge clock) begin
+
+		if (nop_stop == 1) begin
+			stop = 1;
 		end
+		if (uart_stop == 1) begin
+			stop = 1;
+		end
+/*		if (uart_step_counter == 1) begin
+			stop = 1;
+		end
+*/		if (uart_continue == 1) begin
+			stop = 0;
+			reset = 0;
+		end
+		if (uart_reset == 1) begin
+			reset = 1;
+		end
+		if (reset == 1) begin
+			stop = 1;
+		end
+	
+	end	
+	
+	
+	
+	always @(posedge clock) begin 				// ????????????????????????
+		if (stop == 1) begin
+			uart_step_counter = 0;
+		end
+	
 		else begin
+
+			
 			if (reset == 1) begin
 				programcounter = 0;
 			end
 
-			else begin		
+			else begin	
+			
+				if (uart_step_enable == 1) begin
+					uart_step_counter = uart_step_volume;
+				end
 
 				if (pcjumpenable == 1) begin 										//Relative Branch
 					if (programcounter == previous_programcounter + pcchange -1) begin
@@ -109,11 +162,12 @@ module fetch(	clock,
 				end
 				
 				if (pcjumpenable == 0) begin 										//Else increment program counter
-					programcounter = programcounter + 1;
-					fetch1 = fetch2;
-					fetch2[07:00] = instruction_rd1_out[15:08];
-					fetch2[15:08] = instruction_rd1_out[07:00];
-					previous_programcounter = programcounter;			
+						programcounter = programcounter + 1;
+						fetch1 = fetch2;
+						fetch2[07:00] = instruction_rd1_out[15:08];
+						fetch2[15:08] = instruction_rd1_out[07:00];
+						previous_programcounter = programcounter;		
+						uart_step_counter = uart_step_counter - 1;
 				end
 
 				if (flush == 1) begin 												
@@ -124,4 +178,6 @@ module fetch(	clock,
 		end
 	end
 	
+		
+		
 endmodule
