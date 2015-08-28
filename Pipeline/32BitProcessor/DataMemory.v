@@ -14,10 +14,10 @@ module TheDataMemory (clock, reset, data_rd1, data_rd2, data_rd3, data_rd4, data
 	input  [08:00] data_rd3;
 	input  [08:00] data_rd4;				
 
-	output [31:00] data_rd1_out;                         	//What is in that register
-	output [31:00] data_rd2_out;
-	output [31:00] data_rd3_out;
-	output [31:00] data_rd4_out;
+	output [07:00] data_rd1_out;                         	//What is in that register
+	output [07:00] data_rd2_out;
+	output [07:00] data_rd3_out;
+	output [07:00] data_rd4_out;
 
 // write inputs and outputs //
 	
@@ -25,10 +25,10 @@ module TheDataMemory (clock, reset, data_rd1, data_rd2, data_rd3, data_rd4, data
 	input  [08:00] data_wr2;
 	input  [08:00] data_wr3;	                            //Where to write, which register
 	input  [08:00] data_wr4;
-	input  [31:00] data_wr1_data;	                        //What to write
-	input  [31:00] data_wr2_data;
-	input  [31:00] data_wr3_data;	                        //What to write
-	input  [31:00] data_wr4_data;
+	input  [07:00] data_wr1_data;	                        //What to write
+	input  [07:00] data_wr2_data;
+	input  [07:00] data_wr3_data;	                        //What to write
+	input  [07:00] data_wr4_data;
 	input          data_wr1_enable;		                    //Should it write
 	input 		   data_wr2_enable;
 	input          data_wr3_enable;		                    //Should it write

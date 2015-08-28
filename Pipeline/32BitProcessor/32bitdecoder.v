@@ -66,11 +66,6 @@ module decoder(	fetchoutput,
 	reg super_duper_a; // used for 32 bit instructions that cannot be different using operation number alone
 	reg super_duper_b;
 	
-// Memory write //
-	
-	initial begin
- 		$readmemb("opcodemem.list", opcodemem);
-  	end
 		
 
 // Wire Declarations //

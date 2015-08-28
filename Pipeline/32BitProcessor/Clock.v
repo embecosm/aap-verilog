@@ -1,4 +1,4 @@
-module TheCLock (CLOCK_50, clock);
+module Clock (CLOCK_50, clock);
 
 	output clock;
 	input CLOCK_50;

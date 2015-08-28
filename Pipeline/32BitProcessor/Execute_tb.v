@@ -10,6 +10,7 @@ module testbench;
 
 	reg clock;
 	reg reset;
+    wire stop;
 
 	wire [05:00] reg_rd1;
 	wire [05:00] reg_rd2;
@@ -139,7 +140,7 @@ module testbench;
 
     fetch fetch_test (
     	clock,
-        reset, 
+        reset,
     	instruction_rd1[19:00], 
     	instruction_rd1_out[15:00],
     	fetchoutput[31:00],
@@ -147,12 +148,14 @@ module testbench;
 		pclocation[05:00],
         pcjumpenable[02:00],
 		previous_programcounter[19:00],
-        flush
+        flush,
+        stop
     	);
 
     execution execution_test (
     	clock, 
         reset,
+        stop,
     	operationnumber[05:00], 
     	destination[05:00], 
     	source_1[05:00], 
