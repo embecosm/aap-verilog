@@ -69,8 +69,9 @@ module DE0_NANO(
 	/////////// UART /////////////
 	UART_TX,
 	UART_GND,
-	UART_RX
+	UART_RX,
 
+	slow_clock
 );
 
 //=======================================================
@@ -140,6 +141,8 @@ module DE0_NANO(
 	output 	                  UART_TX;
    output                     UART_GND;
    input		  						UART_RX;
+	
+	output 							slow_clock;
 
 //=======================================================
 //  REG/WIRE declarations
@@ -151,20 +154,20 @@ module DE0_NANO(
 	wire [05:00] reg_rd2;
 	wire [05:00] reg_rd3;
 
-	wire [08:00] data_rd1;
-	wire [08:00] data_rd2;
-	wire [08:00] data_rd3;
-	wire [08:00] data_rd4;
+	wire [07:00] data_rd1;
+	wire [07:00] data_rd2;
+	wire [07:00] data_rd3;
+	wire [07:00] data_rd4;
 
 
 	wire [15:00] reg_rd1_out;
 	wire [15:00] reg_rd2_out;
 	wire [15:00] reg_rd3_out;
 
-	wire [31:00] data_rd1_out;
-	wire [31:00] data_rd2_out;
-	wire [31:00] data_rd3_out;
-	wire [31:00] data_rd4_out;		
+	wire [07:00] data_rd1_out;
+	wire [07:00] data_rd2_out;
+	wire [07:00] data_rd3_out;
+	wire [07:00] data_rd4_out;		
 
 	wire [05:00] destination;
 
@@ -188,20 +191,20 @@ module DE0_NANO(
 	wire [15:00] reg_wr3_data;
 	wire 		 reg_wr3_enable;
 
-	wire [08:00] data_wr1;
-	wire [31:00] data_wr1_data;
+	wire [07:00] data_wr1;
+	wire [07:00] data_wr1_data;
 	wire		 data_wr1_enable;
 
-	wire [08:00] data_wr2;
-	wire [31:00] data_wr2_data;
+	wire [07:00] data_wr2;
+	wire [07:00] data_wr2_data;
 	wire		 data_wr2_enable;
 
-	wire [08:00] data_wr3;
-	wire [31:00] data_wr3_data;
+	wire [07:00] data_wr3;
+	wire [07:00] data_wr3_data;
 	wire		 data_wr3_enable;
 
-	wire [08:00] data_wr4;
-	wire [31:00] data_wr4_data;
+	wire [07:00] data_wr4;
+	wire [07:00] data_wr4_data;
 	wire		 data_wr4_enable;
 
 	reg [15:00] register [63:00]; 
@@ -244,9 +247,10 @@ module DE0_NANO(
 	wire uart_stop;
 	wire uart_continue;
 	wire uart_step_enable;
-	wire [04:00] uart_step_volume;
+	wire [05:00] uart_step_volume;
 	 
-	wire [19:00] previous_programcounter;
+	wire [05:00] previous_programcounter;
+	wire [05:00] programcounter;
 	
 //	wire		UART_TX;
 	wire		UART_GND;
@@ -257,8 +261,32 @@ module DE0_NANO(
 //  Structural coding
 //=======================================================
 
+
+//=====================================
+//	Slow Clock
+//=====================================
+// Slow clock down
+	reg 		 		slow_clock_divider_counter;
+   reg 				slow_clock;
+	
+	// Clock counter
+	always @(posedge CLOCK_50) begin
+     if (slow_clock_divider_counter == 1) begin
+			slow_clock = ~slow_clock;
+			slow_clock_divider_counter = 0;
+		end
+		else
+			slow_clock_divider_counter = slow_clock_divider_counter + 1; 	// Otherwise increment the counter
+	end		 
+
+//=====================================
+
+
+//=======================================================
+//		Thunderclap Newman
+//=======================================================
 	// Instantiate the instruction memory
-	TheInstructionMemory i_TheInstructionMemory 	(	.clock           (CLOCK_50),
+	TheInstructionMemory i_TheInstructionMemory 	(	.clock           (slow_clock),
 																	.reset           (myreset),
 																	.instruction_rd1 (instruction_rd1),
 																	.instruction_wr1 (instruction_wr1),
@@ -274,7 +302,7 @@ module DE0_NANO(
 																);
 															
 	// Instantiate the RegisterFile
-	registerfile 			i_registerfile				(	.clock (CLOCK_50),
+	registerfile 			i_registerfile				(	.clock (slow_clock),
 																	.reset (myreset),
 																	.reg_rd1 (reg_rd1),
 																	.reg_rd2 (reg_rd2),
@@ -296,7 +324,7 @@ module DE0_NANO(
 																	.carrybit_wr_enable (carrybit_wr_enable)
 																);
 	//Instantiate the DataMemory
-	TheDataMemory			i_TheDataMemory			(	.clock (CLOCK_50),
+	TheDataMemory			i_TheDataMemory			(	.clock (slow_clock),
 																	.reset (myreset),
 																	.data_rd1 (data_rd1),
 																	.data_rd2 (data_rd2),
@@ -320,7 +348,7 @@ module DE0_NANO(
 																	.data_wr4_enable (data_wr4_enable)
 																);
 	// Instantiate the fetch unit
-	fetch 					i_fetch 						(	.clock (CLOCK_50),
+	fetch 					i_fetch 						(	.clock (slow_clock),
 																	.reset (myreset),
 																	.nop_stop (nop_stop),
 																	.instruction_rd1 (instruction_rd1),
@@ -357,7 +385,7 @@ module DE0_NANO(
 																	.super_duper_b (super_duper_b)
 																);
 	// Instantiate the execute
-	execution				i_execuition				(	.clock (CLOCK_50),
+	execution				i_execuition				(	.clock (slow_clock),
 																	.reset (myreset),
 																	.nop_stop (nop_stop),
 																	.destination (destination),
@@ -408,7 +436,8 @@ module DE0_NANO(
 																);
 																
 	//Instantiate the uart
-	uart						i_uart						(	.clock (CLOCK_50),
+	uart						i_uart						(	.clock (slow_clock),
+																	.superclock (CLOCK_50),
 																	.reset (myreset),
 																	.UART_TX (UART_TX),
 																	.UART_GND (UART_GND),
