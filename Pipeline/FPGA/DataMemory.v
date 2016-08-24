@@ -31,10 +31,10 @@ module TheDataMemory (	clock,
 // read inputs and outputs //
 
 
-	input  [07:00] data_rd1; 	                            //Which register to read from
-	input  [07:00] data_rd2;		                            //20 bits wide because we have up to 1048576 data
-	input  [07:00] data_rd3;
-	input  [07:00] data_rd4;				
+	input  [08:00] data_rd1; 	                            //Which register to read from
+	input  [08:00] data_rd2;		                            //20 bits wide because we have up to 1048576 data
+	input  [08:00] data_rd3;
+	input  [08:00] data_rd4;				
 
 	output [07:00] data_rd1_out;                         	//What is in that register
 	output [07:00] data_rd2_out;
@@ -43,10 +43,10 @@ module TheDataMemory (	clock,
 
 // write inputs and outputs //
 	
-	input  [07:00] data_wr1;	                             //Where to write, which register
-	input  [07:00] data_wr2;
-	input  [07:00] data_wr3;	                            
-	input  [07:00] data_wr4;
+	input  [05:00] data_wr1;	                             //Where to write, which register
+	input  [05:00] data_wr2;
+	input  [05:00] data_wr3;	                            
+	input  [05:00] data_wr4;
 	input  [07:00] data_wr1_data;	                          //What to write
 	input  [07:00] data_wr2_data;
 	input  [07:00] data_wr3_data;	                        

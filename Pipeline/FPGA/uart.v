@@ -1,5 +1,4 @@
 module uart (	clock,
-					superclock,
 					reset,
 					UART_TX,
 					UART_GND,
@@ -31,7 +30,6 @@ module uart (	clock,
 				
 	input				clock;
 	input				reset;
-	input				superclock;
 	
 	output reg		uart_reset;
 
@@ -51,21 +49,22 @@ module uart (	clock,
 	output	[05:00]	instruction_wr2;
 	output	instruction_wr2_enable;
 	
-	output	[07:00]	data_rd3;
+	output	[05:00]	data_rd3;
 	input		[07:00]	data_rd3_out;
-	output	[07:00]	data_wr3;
+	output	[05:00]	data_wr3;
 	output	[07:00]	data_wr3_data;
 	output	data_wr3_enable;
 
 	output reg uart_stop;
 	output reg uart_continue;
 	output reg uart_step_enable;
-	output reg [05:00] uart_step_volume;
+	output 	  uart_step_volume;
 	
-
 	
-	input [05:00] previous_programcounter;
-	input [05:00] programcounter;
+	reg [04:00] uart_step_volume;
+	
+	input [06:00] previous_programcounter;
+	input [06:00] programcounter;
 	
 	reg [05:00] reg_rd3;
 	reg [05:00] reg_wr3;
@@ -77,21 +76,20 @@ module uart (	clock,
 	reg [15:00]	instruction_wr2_data;
 	reg instruction_wr2_enable;
 	
-	reg [07:00] data_rd3;
-	reg [07:00] data_wr3;
-	reg [07:00] data_wr3_data;
+	reg [05:00] data_rd3;
+	reg [05:00] data_wr3;
+	reg [15:00] data_wr3_data;
 	reg data_wr3_enable;
 	
  	//output [07:00] LED;
 	
 	//UART transmit at 300 baud from 50MHz clock
-	reg [16:00] 		clock_divider_counter;
+	reg [16:0] 		clock_divider_counter;
    reg 				uart_clock;
 	
 	// Clock counter
-	always @(posedge superclock) begin
+	always @(posedge clock) begin
      if (reset == 1'b1)
-			//uart_clock = 0;
 			clock_divider_counter = 0;
 		else if (clock_divider_counter == 83333)
 			clock_divider_counter = 0;
@@ -100,7 +98,7 @@ module uart (	clock,
 	end		
 	
 	// Generate a clock (toggle this register)
-   always @(posedge superclock) begin
+   always @(posedge clock) begin
 		if (reset == 1'b1)
 			uart_clock <= 0;
 		else if (clock_divider_counter == 83333)
@@ -218,7 +216,7 @@ module uart (	clock,
 		
 		end
 		
-		always @(posedge clock) begin
+		always @(posedge uart_clock) begin
 			transmit_data = transmit_storage[transmit_data_state];
 		end
 		
@@ -243,13 +241,7 @@ module uart (	clock,
 				end
 				if (saved_memory[0] == 43) begin//Step
 					uart_step_enable = 1;
-					
-					uart_step_volume[00] = saved_memory[07] - 48;
-					uart_step_volume[01] = saved_memory[06] - 48;
-					uart_step_volume[02] = saved_memory[05] - 48;
-					uart_step_volume[03] = saved_memory[04] - 48;
-					uart_step_volume[04] = saved_memory[03] - 48;
-					uart_step_volume[05] = saved_memory[02] - 48;
+					uart_step_volume = saved_memory[2] - 48;
 				end
 				if (saved_memory[0] == 82) begin//Reset
 					uart_reset = 1;
@@ -277,75 +269,83 @@ module uart (	clock,
 				end
 				
 				if (saved_memory[0] == 126) begin // previous program counter
-					transmit_data_state_max = 6;
+					transmit_data_state_max = 7;
 					transmit_storage[0] = 32;
-						
-					if (previous_programcounter[05] == 0)
+					if (previous_programcounter[06] == 0)
 						transmit_storage[01] = 48;
-					if (previous_programcounter[05] == 1)
+					if (previous_programcounter[06] == 1)
 						transmit_storage[01] = 49;
 						
-					if (previous_programcounter[04] == 0)
+					if (previous_programcounter[05] == 0)
 						transmit_storage[02] = 48;
-					if (previous_programcounter[04] == 1)
+					if (previous_programcounter[05] == 1)
 						transmit_storage[02] = 49;
 						
-					if (previous_programcounter[03] == 0)
+					if (previous_programcounter[04] == 0)
 						transmit_storage[03] = 48;
-					if (previous_programcounter[03] == 1)
+					if (previous_programcounter[04] == 1)
 						transmit_storage[03] = 49;
 						
-					if (previous_programcounter[02] == 0)
+					if (previous_programcounter[03] == 0)
 						transmit_storage[04] = 48;
-					if (previous_programcounter[02] == 1)
+					if (previous_programcounter[03] == 1)
 						transmit_storage[04] = 49;
 						
-					if (previous_programcounter[01] == 0)
+					if (previous_programcounter[02] == 0)
 						transmit_storage[05] = 48;
-					if (previous_programcounter[01] == 1)
+					if (previous_programcounter[02] == 1)
 						transmit_storage[05] = 49;
-				
-					if (previous_programcounter[00] == 0)
+						
+					if (previous_programcounter[01] == 0)
 						transmit_storage[06] = 48;
-					if (previous_programcounter[00] == 1)
+					if (previous_programcounter[01] == 1)
 						transmit_storage[06] = 49;
+						
+					if (previous_programcounter[00] == 0)
+						transmit_storage[07] = 48;
+					if (previous_programcounter[00] == 1)
+						transmit_storage[07] = 49;
 
 					
 				end
 				
 				if (saved_memory[0] == 112) begin // current programcounter (dosnt work?)
-					transmit_data_state_max = 6;
+					transmit_data_state_max = 7;
 					transmit_storage[0] = 32;
-						
-					if (programcounter[05] == 0)
+					if (programcounter[06] == 0)
 						transmit_storage[01] = 48;
-					if (programcounter[05] == 1)
+					if (programcounter[06] == 1)
 						transmit_storage[01] = 49;
 						
-					if (programcounter[04] == 0)
+					if (programcounter[05] == 0)
 						transmit_storage[02] = 48;
-					if (programcounter[04] == 1)
+					if (programcounter[05] == 1)
 						transmit_storage[02] = 49;
 						
-					if (programcounter[03] == 0)
+					if (programcounter[04] == 0)
 						transmit_storage[03] = 48;
-					if (programcounter[03] == 1)
+					if (programcounter[04] == 1)
 						transmit_storage[03] = 49;
 						
-					if (programcounter[02] == 0)
+					if (programcounter[03] == 0)
 						transmit_storage[04] = 48;
-					if (programcounter[02] == 1)
+					if (programcounter[03] == 1)
 						transmit_storage[04] = 49;
 						
-					if (programcounter[01] == 0)
+					if (programcounter[02] == 0)
 						transmit_storage[05] = 48;
-					if (programcounter[01] == 1)
+					if (programcounter[02] == 1)
 						transmit_storage[05] = 49;
 						
-					if (programcounter[00] == 0)
+					if (programcounter[01] == 0)
 						transmit_storage[06] = 48;
-					if (programcounter[00] == 1)
+					if (programcounter[01] == 1)
 						transmit_storage[06] = 49;
+						
+					if (programcounter[00] == 0)
+						transmit_storage[07] = 48;
+					if (programcounter[00] == 1)
+						transmit_storage[07] = 49;
 
 					
 				end
@@ -414,14 +414,12 @@ module uart (	clock,
 				if (saved_memory[0] == 68) begin // Read data memory
 					transmit_data_state_max = 8; 
 					
-					data_rd3[00] = saved_memory[09] - 48;
-					data_rd3[01] = saved_memory[08] - 48;
-					data_rd3[02] = saved_memory[07] - 48;
-					data_rd3[03] = saved_memory[06] - 48;
-					data_rd3[04] = saved_memory[05] - 48;
-					data_rd3[05] = saved_memory[04] - 48;
-					data_rd3[06] = saved_memory[03] - 48;
-					data_rd3[07] = saved_memory[02] - 48;
+					data_rd3[00] = saved_memory[07] - 48;
+					data_rd3[01] = saved_memory[06] - 48;
+					data_rd3[02] = saved_memory[05] - 48;
+					data_rd3[03] = saved_memory[04] - 48;
+					data_rd3[04] = saved_memory[03] - 48;
+					data_rd3[05] = saved_memory[02] - 48;
 					
 					transmit_storage[00] = 32;
 					transmit_storage[01] = data_rd3_out[07] + 48;
@@ -431,6 +429,7 @@ module uart (	clock,
 					transmit_storage[05] = data_rd3_out[03] + 48;
 					transmit_storage[06] = data_rd3_out[02] + 48;
 					transmit_storage[07] = data_rd3_out[01] + 48;
+					transmit_storage[08] = data_rd3_out[00] + 48;
 				
 				end
 				
@@ -439,24 +438,22 @@ module uart (	clock,
 					transmit_data_state_max = 18; 
 					data_wr3_enable = 1;
 					
-					data_wr3[01] = saved_memory[08] - 48;
-					data_wr3[02] = saved_memory[07] - 48;
-					data_wr3[03] = saved_memory[06] - 48;
-					data_wr3[04] = saved_memory[05] - 48;
-					data_wr3[05] = saved_memory[04] - 48;
-					data_wr3[06] = saved_memory[03] - 48;
-					data_wr3[07] = saved_memory[02] - 48;
+					data_wr3[00] = saved_memory[07] - 48;
+					data_wr3[01] = saved_memory[06] - 48;
+					data_wr3[02] = saved_memory[05] - 48;
+					data_wr3[03] = saved_memory[04] - 48;
+					data_wr3[04] = saved_memory[03] - 48;
+					data_wr3[05] = saved_memory[02] - 48;
 					
-					data_wr3_data[00] = saved_memory[17] - 48;
-					data_wr3_data[01] = saved_memory[16] - 48;
-					data_wr3_data[02] = saved_memory[15] - 48;
-					data_wr3_data[03] = saved_memory[14] - 48;
-					data_wr3_data[04] = saved_memory[13] - 48;
-					data_wr3_data[05] = saved_memory[12] - 48;
-					data_wr3_data[06] = saved_memory[11] - 48;
-					data_wr3_data[07] = saved_memory[10] - 48;
+					data_wr3_data[00] = saved_memory[16] - 48;
+					data_wr3_data[01] = saved_memory[15] - 48;
+					data_wr3_data[02] = saved_memory[14] - 48;
+					data_wr3_data[03] = saved_memory[13] - 48;
+					data_wr3_data[04] = saved_memory[12] - 48;
+					data_wr3_data[05] = saved_memory[11] - 48;
+					data_wr3_data[06] = saved_memory[10] - 48;
+					data_wr3_data[07] = saved_memory[09] - 48;
 					
-				/*	
 					transmit_storage[00] = 32;
 					transmit_storage[01] = data_wr3[05] + 48;
 					transmit_storage[02] = data_wr3[04] + 48;
@@ -475,7 +472,7 @@ module uart (	clock,
 					transmit_storage[15] = data_wr3_data[00] + 48;
 					transmit_storage[16] = 32;
 					transmit_storage[17] = data_wr3_enable + 48;
-				*/
+					
 				end
 				
 				if (saved_memory[0] == 73) begin // Read from Instruction memory
@@ -570,10 +567,7 @@ module uart (	clock,
 					
 				end	
 			
-				else begin //Space
-					//transmit_data_state_max = 1;
-					transmit_storage[0] = 32;
-				end		
+					
 			
 			//	else begin
 			//	transmit_data_state_max = 0;

@@ -1,10 +1,10 @@
-/* Quartus Prime Version 16.0.0 Build 211 04/27/2016 SJ Lite Edition */
+/* Quartus II 64-Bit Version 15.0.0 Build 145 04/22/2015 SJ Web Edition */
 JedecChain;
 	FileRevision(JESD32A);
 	DefaultMfr(6E);
 
 	P ActionCode(Cfg)
-		Device PartName(EP4CE22F17) Path("/home/euser/Documents/AAP_DE0-NANO/aap-verilog-master/Pipeline/FPGA/") File("DE0_NANO.sof") MfrSpec(OpMask(1));
+		Device PartName(EP4CE22F17) Path("/home/dan/Documents/aap/fpga/") File("DE0_NANO.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 

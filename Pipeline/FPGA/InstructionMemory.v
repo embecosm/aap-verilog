@@ -69,7 +69,7 @@ module TheInstructionMemory (	clock,
 //			$readmemb("instructionmemory.list", instruction_memory);
 			
 			for (instructionloopcount = 0; instructionloopcount < 64; instructionloopcount = instructionloopcount +1) begin
-				instruction_memory[instructionloopcount] = 1 /*64*/;
+				instruction_memory[instructionloopcount] = 256 /*64*/;
 			end
 	
 		end

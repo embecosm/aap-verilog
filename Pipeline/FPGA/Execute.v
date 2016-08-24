@@ -91,7 +91,7 @@ module execution (	clock,
 	output [02:00]	pcjumpenable;
 	output [15:00]	pclocation;
 
-	input [06:00]	previous_programcounter;
+	input [19:00]	previous_programcounter;
 
 	input 			super_duper_a;
 	input 			super_duper_b;
@@ -121,15 +121,15 @@ module execution (	clock,
 	input [07:00]	data_rd3_out;
 	input [07:00]	data_rd4_out;
 
-	output [07:00] 	data_rd1;
-	output [07:00] 	data_rd2;
-	output [07:00] 	data_rd3;
-	output [07:00] 	data_rd4;
+	output [08:00] 	data_rd1;
+	output [08:00] 	data_rd2;
+	output [08:00] 	data_rd3;
+	output [08:00] 	data_rd4;
 
-	output [07:00] 	data_wr1;
-	output [07:00] 	data_wr2;
-	output [07:00]		data_wr3;
-	output [07:00]		data_wr4;
+	output [08:00] 	data_wr1;
+	output [08:00] 	data_wr2;
+	output [08:00]		data_wr3;
+	output [08:00]		data_wr4;
 	output [07:00] 	data_wr1_data;
 	output [07:00] 	data_wr2_data;
 	output [07:00] 	data_wr3_data;
@@ -162,15 +162,15 @@ module execution (	clock,
 
 	wire [05:00]operationnumber;
 
-	reg [07:00] data_rd1;
-	reg [07:00] data_rd2;
-	reg [07:00] data_rd3;
-	reg [07:00] data_rd4;
+	reg [08:00] data_rd1;
+	reg [08:00] data_rd2;
+	reg [08:00] data_rd3;
+	reg [08:00] data_rd4;
 
-	reg [07:00]	data_wr1;
-	reg [07:00]	data_wr2;
-	reg [07:00]	data_wr3;
-	reg [07:00]	data_wr4;
+	reg [08:00]	data_wr1;
+	reg [08:00]	data_wr2;
+	reg [08:00]	data_wr3;
+	reg [08:00]	data_wr4;
 	reg [07:00]	data_wr1_data;
 	reg [07:00]	data_wr2_data;
 	reg [07:00]	data_wr3_data;
