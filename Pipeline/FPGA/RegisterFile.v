@@ -1,176 +1,147 @@
-module registerfile (clock,
-							reset,
-							reg_rd1,
-							reg_rd2, 
-							reg_rd3, 
-							reg_wr1, 
-							reg_wr2,
-							reg_wr3,
-							reg_wr1_data, 
-							reg_wr2_data,
-							reg_wr3_data,
-							reg_wr1_enable, 
-							reg_wr2_enable,
-							reg_wr3_enable,
-							reg_rd1_out, 
-							reg_rd2_out, 
-							reg_rd3_out,
-							carrybit,
-							carrybit_wr,
-							carrybit_wr_enable
-							);
-	
-	input clock;
-	input reset;
+// AAP register file
+
+// Copyright Embecosm 2015, 2016.
+
+// Contributor Dan Gorringe <dan.gorringe@embecosm.com>
+// Contributor Jeremy Bennett <jeremy.bennett@embecosm.com>
+
+// This file documents the AAP design for FPGA.  It describes Open Hardware
+// and is licensed under the CERN OHL v. 1.2.
+
+// You may redistribute and modify this documentation under the terms of the
+// CERN OHL v.1.2. (http://ohwr.org/cernohl). This documentation is
+// distributed WITHOUT ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING OF
+// MERCHANTABILITY, SATISFACTORY QUALITY AND FITNESS FOR A PARTICULAR
+// PURPOSE. Please see the CERN OHL v.1.2 for applicable conditions
 
 
-// This register has five ports: three read, two write
+// Read 3 regs and the carry bit and write 3 regs and the carry bit each cycle
 
-// read inputs and outputs //
+module RegisterFile (input         clk,
+		     input         rst,
 
+		     input [5:0]   rega_rregnum,
+		     input [5:0]   rega_wregnum,
+		     output [15:0] rega_rdata,
+		     input [15:0]  rega_wdata,
+		     input         rega_we,
 
-	input [05:00]reg_rd1; 		//Which register to read from
-	input [05:00]reg_rd2;		// 6 bits wide because we have up to 64 data
-	input [05:00]reg_rd3;		
+		     input [5:0]   regb_rregnum,
+		     input [5:0]   regb_wregnum,
+		     output [15:0] regb_rdata,
+		     input [15:0]  regb_wdata,
+		     input         regb_we,
 
-	output [15:00]reg_rd1_out; 	//What is in that register
-	output [15:00]reg_rd2_out;
-	output [15:00]reg_rd3_out;
+		     input [5:0]   regd_rregnum,
+		     input [5:0]   regd_wregnum,
+		     output [15:0] regd_rdata,
+		     input [15:0]  regd_wdata,
+		     input         regd_we);
 
-// write inputs and outputs //
-	
-	input  [05:00]reg_wr1;		//Where to write, which register
-	input  [05:00]reg_wr2;
-	input  [05:00]reg_wr3;
+   // Registers //
+   reg [15:0]  register [63:0];
 
-	input  [15:00]reg_wr1_data;	//What to write
-	input  [15:00]reg_wr2_data;
-	input  [15:00]reg_wr3_data;
-	
-	input reg_wr1_enable;		//Should it write
-	input reg_wr2_enable;
-	input reg_wr3_enable;
-	
-	input carrybit_wr; 			//what bit should be
-	input carrybit_wr_enable;	//should you write the bit?
+   // Read logic
+   // This is combinatoral, this happens continuously
 
-	output carrybit;				//with is carry bit currently
+   assign rega_rdata = register[rega_rregnum];
+   assign regb_rdata = register[regb_rregnum];
+   assign regd_rdata = register[regd_rregnum];
 
-// integers //
+   // Write logic //
+   // This is sequential, it will only happen on the clock
 
-//	integer registerloopcount;
+   always @(posedge clk) begin
+      if (rst) begin
 
-// Registers //
-	reg [19:00] registerloopcount;
-	
-	reg [15:00] register [63:00]; 
-	
-	reg carrybit;
+ 	 // Reset all Registers.  We lay this out by hand (we could use a
+	 // generate), since verilator doesn't like non-blocking assignment to
+	 // vectors
 
-// Read logic //
-	
-	assign reg_rd1_out = register[reg_rd1]; // this is combinatoral, this happens automatically
-	assign reg_rd2_out = register[reg_rd2];
-	assign reg_rd3_out = register[reg_rd3];
-	
+	 register[0]  <= 16'b0;
+	 register[1]  <= 16'b0;
+	 register[2]  <= 16'b0;
+	 register[3]  <= 16'b0;
+	 register[4]  <= 16'b0;
+	 register[5]  <= 16'b0;
+	 register[6]  <= 16'b0;
+	 register[7]  <= 16'b0;
+	 register[8]  <= 16'b0;
+	 register[9]  <= 16'b0;
+	 register[10] <= 16'b0;
+	 register[11] <= 16'b0;
+	 register[12] <= 16'b0;
+	 register[13] <= 16'b0;
+	 register[14] <= 16'b0;
+	 register[15] <= 16'b0;
+	 register[16] <= 16'b0;
+	 register[17] <= 16'b0;
+	 register[18] <= 16'b0;
+	 register[19] <= 16'b0;
+	 register[20] <= 16'b0;
+	 register[21] <= 16'b0;
+	 register[22] <= 16'b0;
+	 register[23] <= 16'b0;
+	 register[24] <= 16'b0;
+	 register[25] <= 16'b0;
+	 register[26] <= 16'b0;
+	 register[27] <= 16'b0;
+	 register[28] <= 16'b0;
+	 register[29] <= 16'b0;
+	 register[30] <= 16'b0;
+	 register[31] <= 16'b0;
+	 register[32] <= 16'b0;
+	 register[33] <= 16'b0;
+	 register[34] <= 16'b0;
+	 register[35] <= 16'b0;
+	 register[36] <= 16'b0;
+	 register[37] <= 16'b0;
+	 register[38] <= 16'b0;
+	 register[39] <= 16'b0;
+	 register[40] <= 16'b0;
+	 register[41] <= 16'b0;
+	 register[42] <= 16'b0;
+	 register[43] <= 16'b0;
+	 register[44] <= 16'b0;
+	 register[45] <= 16'b0;
+	 register[46] <= 16'b0;
+	 register[47] <= 16'b0;
+	 register[48] <= 16'b0;
+	 register[49] <= 16'b0;
+	 register[50] <= 16'b0;
+	 register[51] <= 16'b0;
+	 register[52] <= 16'b0;
+	 register[53] <= 16'b0;
+	 register[54] <= 16'b0;
+	 register[55] <= 16'b0;
+	 register[56] <= 16'b0;
+	 register[57] <= 16'b0;
+	 register[58] <= 16'b0;
+	 register[59] <= 16'b0;
+	 register[60] <= 16'b0;
+	 register[61] <= 16'b0;
+	 register[62] <= 16'b0;
+	 register[63] <= 16'b0;
 
-// Write logic //
+      end // if (rst)
 
-	always @(posedge clock or posedge reset) begin // this is sequential, it will only happen on the clock or reset
-		
-		if (reset) begin 	// Reset all Registers
-			//$readmemb("register.list", register);
-			// Reset Loop //
-				carrybit  = 0;
-		        for (registerloopcount = 0; registerloopcount < 64; registerloopcount = registerloopcount +1) begin
-		            register[registerloopcount] = 0;
-		        end
-		    
-		end 
-/*			register[0]  = 0;
-			register[1]  = 0;
-			register[2]  = 0;
-			register[3]  = 0;
-			register[4]  = 0;
-			register[5]  = 0;
-			register[6]  = 0;
-			register[7]  = 0;
-			register[8]  = 0;
-			register[9]  = 0;
-			register[10] = 0;
-			register[11] = 0;
-			register[12] = 0;
-			register[13] = 0;
-			register[14] = 0;
-			register[15] = 0;
-			register[16] = 0;
-			register[27] = 0;
-			register[18] = 0;
-			register[19] = 0;
-			register[20] = 0;
-			register[21] = 0;
-			register[22] = 0;
-			register[23] = 0;
-			register[24] = 0;
-			register[25] = 0;
-			register[26] = 0;
-			register[27] = 0;
-			register[28] = 0;
-			register[29] = 0;
-			register[30] = 0;
-			register[31] = 0;
-			register[32] = 0;
-			register[32] = 0;
-			register[33] = 0;
-			register[34] = 0;
-			register[35] = 0;
-			register[36] = 0;
-			register[37] = 0;
-			register[38] = 0;
-			register[39] = 0;
-			register[50] = 0;
-			register[51] = 0;
-			register[52] = 0;
-			register[53] = 0;
-			register[54] = 0;
-			register[55] = 0;
-			register[56] = 0;
-			register[57] = 0;
-			register[58] = 0;
-			register[59] = 0;
-			register[60] = 0;
-			register[61] = 0;
-			register[62] = 0;
-			register[63] = 0; */
-		else begin
-		
-			if (reg_wr1_enable == 1) begin
-				register[reg_wr1] = reg_wr1_data;
-			end
+      else begin
 
-			if (reg_wr2_enable == 1) begin
-				register[reg_wr2] = reg_wr2_data;
-			end
+	 // Write any registers which are enabled
 
-			if (reg_wr3_enable == 1) begin
-				register[reg_wr3] = reg_wr3_data;
-			end
-			
-			if (carrybit_wr_enable == 1) begin
-				carrybit = carrybit_wr;
-			end
+	 if (rega_we == 1) begin
+	    register[rega_wregnum] <= rega_wdata;
+	 end
 
-		end
+	 if (regb_we == 1) begin
+	    register[regb_wregnum] <= regb_wdata;
+	 end
 
-	end
-	/*
-	initial begin
-		#6
-		register[0] = 0;
-		register[1] = 3;
-		register[2] = 2;
-		#504
-		$finish;
-	end
-	*/
+	 if (regd_we == 1) begin
+	    register[regd_wregnum] <= regd_wdata;
+	 end
+      end // else: !if(rst)
+
+   end // always @ (posedge clk)
+
 endmodule

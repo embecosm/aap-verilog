@@ -1,96 +1,96 @@
-module TheInstructionMemory (	clock,
-										reset,
-										instruction_rd1,
-										instruction_wr1,
-										instruction_wr1_data,
-										instruction_wr1_enable,
-										instruction_rd1_out,										
-										instruction_rd2,
-										instruction_wr2,
-										instruction_wr2_data,
-										instruction_wr2_enable,
-										instruction_rd2_out
-									);
-	
-	input clock;
-	input reset;
+// Instruction memory Verilog file
 
-// This register has eight ports: four read, four Write 			?????????????????????
+// Copyright Embecosm 2015, 2016.
 
-// read inputs and outputs //
+// Contributor Dan Gorringe <dan.gorringe@embecosm.com>
+// Contributor Jeremy Bennett <jeremy.bennett@embecosm.com>
 
-	input  [05:00] instruction_rd1; 	                            //Which register to read from
-	input  [05:00] instruction_rd2;		                            //20 bits wide because we have up to 1048576 data
-//	input  [05:00] instruction_rd3;
-//	input  [05:00] instruction_rd4;				
+// This file documents the AAP design for FPGA.  It describes Open Hardware
+// and is licensed under the CERN OHL v. 1.2.
 
-	output [15:00] instruction_rd1_out;                         	//What is in that register
-	output [15:00] instruction_rd2_out;
-//	output [15:00] instruction_rd3_out;
-//	output [15:00] instruction_rd4_out;
+// You may redistribute and modify this documentation under the terms of the
+// CERN OHL v.1.2. (http://ohwr.org/cernohl). This documentation is
+// distributed WITHOUT ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING OF
+// MERCHANTABILITY, SATISFACTORY QUALITY AND FITNESS FOR A PARTICULAR
+// PURPOSE. Please see the CERN OHL v.1.2 for applicable conditions
 
-// write inputs and outputs //
-	
-	input  [05:00] instruction_wr1;	                               	//Where to write, which register
-	input  [05:00] instruction_wr2;
-//	input  [05:00] instruction_wr3;	                               	//Where to write, which register
-//	input  [05:00] instruction_wr4;
 
-	input  [15:00] instruction_wr1_data;	                        //What to write
-	input  [15:00] instruction_wr2_data;
-//	input  [15:00] instruction_wr3_data;	                        //What to write
-//	input  [15:00] instruction_wr4_data;
+// This memory has four ports: two read, two write.  Although AAP provides for
+// up to 24-bits of instruction address, this implementation uses just 17
+// bits, giving a total of 128KW.  The MyStorm has a 256kW SRAM, and the
+// instruction memory is the first half of this.
 
-	input          instruction_wr1_enable;		                    //Should it write
-	input 		   instruction_wr2_enable;
-//	input          instruction_wr3_enable;		                    //Should it write
-//	input 		   instruction_wr4_enable;
+// We achieve the desired behavior by using the fast clock to access the
+// memory four times during a main clock cycle.  We could do this better!
 
-// Integers //
-	
-	reg [19:00]instructionloopcount;
+// - posedge 0 - read enable, set read1 address
+// - posedge 1 - latch read1 data, write enable and set write1 address & data
+// - posedge 2 - read enable, set read2 address
+// - posedge 3 - latch read2 data, write enable and set write2 address & data
 
-// Registers //
-	
-	reg [15:00] instruction_memory [63:00]; 
+module InstructionMemory (input         clk50,
+			  input [1:0]	clk_phase,
 
-// Read logic //
-	
-	assign instruction_rd1_out = instruction_memory[instruction_rd1];                       //this is combinatoral, this happens automatically
-	assign instruction_rd2_out = instruction_memory[instruction_rd2];
-//	assign instruction_rd3_out = instruction_memory[instruction_rd3];
-//	assign instruction_rd4_out = instruction_memory[instruction_rd4];
+			  // External SRAM
 
-// Write logic //
+			  output 	ram_we,
+			  output 	ram_oe,
 
-	always @(posedge clock or posedge reset) begin                  // this is sequential, it will only happen on the clock or reset
-		
-		if (reset == 1) begin
-//			$readmemb("instructionmemory.list", instruction_memory);
-			
-			for (instructionloopcount = 0; instructionloopcount < 64; instructionloopcount = instructionloopcount +1) begin
-				instruction_memory[instructionloopcount] = 1 /*64*/;
-			end
-	
-		end
-		else begin
-		
-			if (instruction_wr1_enable == 1) begin
-				instruction_memory[instruction_wr1] = instruction_wr1_data;
-			end
+			  output [17:0] ram_addr,
+			  inout [15:0] 	ram_data,
 
-			if (instruction_wr2_enable == 1) begin
-				instruction_memory[instruction_wr2] = instruction_wr2_data;
-			end
+			  // Port 1
 
-//			if (instruction_wr3_enable == 1) begin
-//				instruction_memory[instruction_wr3] = instruction_wr3_data;
-//			end
+			  input [16:0] 	i_rd1_addr,
+			  input [16:0] 	i_wr1_addr,
+			  input [15:0] 	i_wr1_data,
+			  input 	i_wr1_en,
+			  output [15:0] i_rd1_data,
 
-//			if (instruction_wr4_enable == 1) begin
-//				instruction_memory[instruction_wr4] = instruction_wr4_data;
-//			end
-		end
+			  // Port 2
+
+			  input [16:0] 	i_rd2_addr,
+			  input [16:0] 	i_wr2_addr,
+			  input [15:0] 	i_wr2_data,
+			  input 	i_wr2_en,
+			  output [15:0] i_rd2_data );
+
+   reg [15:0] i_rd1_data_latched;
+   reg [15:0] i_rd2_data_latched;
+
+   assign i_rd1_data = i_rd1_data_latched;
+   assign i_rd2_data = i_rd2_data_latched;
+
+   always @(posedge clk50) begin
+      case (clk_phase)
+	2'b00: begin
+	   ram_we <= 0;
+	   ram_oe <= 1;
+	   ram_addr <= {1'b0,i_rd1_addr};
 	end
+
+	2'b01: begin
+	   i_rd1_data_latched <= ram_data;
+	   ram_we <= i_wr1_en;
+	   ram_oe <= 0;
+	   ram_addr <= {1'b0,i_wr1_addr};
+	   ram_data <= i_wr1_data;
+	end
+
+	2'b10: begin
+	   ram_we <= 0;
+	   ram_oe <= 1;
+	   ram_addr <= {1'b0,i_rd2_addr};
+	end
+
+	2'b11: begin
+	   i_rd2_data_latched <= ram_data;
+	   ram_we <= i_wr2_en;
+	   ram_oe <= 0;
+	   ram_addr <= {1'b0,i_wr2_addr};
+	   ram_data <= i_wr2_data;
+	end
+      endcase // case (clk_phase)
+   end
 
 endmodule

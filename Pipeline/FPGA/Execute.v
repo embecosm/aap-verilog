@@ -1,675 +1,662 @@
-module execution (	clock, 
-					reset,
-					nop_stop,
-					operationnumber,
-					destination,
-					source_1,
-					source_2,
-					unsigned_1,
-					unsigned_2,
-					unsigned_3,
-					unsigned_4,
-					unsigned_5,
-					signed_3,
-					signed_2,
-					signed_1,
-					reg_rd1,
-					reg_rd2, 
-					//reg_rd3, 
-					reg_wr1, 
-					reg_wr2, 
-					reg_wr1_data, 
-					reg_wr2_data, 
-					reg_wr1_enable, 
-					reg_wr2_enable, 
-					reg_rd1_out, 
-					reg_rd2_out, 
-					//reg_rd3_out,
-					data_rd1, 
-					data_rd2, 
-					data_rd3, 
-					data_rd4, 
-					data_wr1, 
-					data_wr2, 
-					data_wr3, 
-					data_wr4, 
-					data_wr1_data, 
-					data_wr2_data, 
-					data_wr3_data, 
-					data_wr4_data, 
-					data_wr1_enable, 
-					data_wr2_enable, 
-					data_wr3_enable, 
-					data_wr4_enable, 
-					data_rd1_out, 
-					data_rd2_out, 
-					data_rd3_out, 
-					data_rd4_out,
-					pcchange,
-					pcjumpenable,
-					pclocation,
-					previous_programcounter,
-					super_duper_a,
-					super_duper_b,
-					carrybit,
-					carrybit_wr,
-					carrybit_wr_enable,
-					//LED
-					);
-	
-	input 			clock;
-	input 			reset;
-	
-	output			nop_stop;
-	
-	// Decoder //
+// Verilog for processor execute stage
 
-	
-	//output		     [7:0]		LED;
-	//reg [07:00] ledscount;
-	
-	//assign LED [07:00] = ~ledscount[07:00];
-	
-//	always @(posedge clock) begin
-//		ledscount = operationnumber;
-//	end
-	
-	input [05:00]	operationnumber;
-	input [05:00]	destination; 
-	input [05:00]	source_2;
-	input [05:00]	source_1;
-	input [08:00]	unsigned_5;
-	input [09:00]	unsigned_4;
-	input [08:00]	unsigned_3;
-	input [15:00]	unsigned_2;
-	input [05:00]	unsigned_1;
-	input [21:00]	signed_1;
-	input [15:00]	signed_2;
-	input [09:00]	signed_3;
+// Copyright Embecosm 2015, 2016.
 
-	output [08:00]	pcchange;
-	output [02:00]	pcjumpenable;
-	output [15:00]	pclocation;
+// Contributor Dan Gorringe <dan.gorringe@embecosm.com>
+// Contributor Jeremy Bennett <jeremy.bennett@embecosm.com>
 
-	input [06:00]	previous_programcounter;
+// This file documents the AAP design for FPGA.  It describes Open Hardware
+// and is licensed under the CERN OHL v. 1.2.
 
-	input 			super_duper_a;
-	input 			super_duper_b;
+// You may redistribute and modify this documentation under the terms of the
+// CERN OHL v.1.2. (http://ohwr.org/cernohl). This documentation is
+// distributed WITHOUT ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING OF
+// MERCHANTABILITY, SATISFACTORY QUALITY AND FITNESS FOR A PARTICULAR
+// PURPOSE. Please see the CERN OHL v.1.2 for applicable conditions
 
 
-	// RegisterFile //
+// Common constants
 
-	input [15:00]	reg_rd1_out;
-	input [15:00]	reg_rd2_out;
-	//input [15:00]	reg_rd3_out;
-
-	output [05:00]	reg_wr1;
-	output [05:00]	reg_wr2;
-	output 			reg_wr1_enable;
-	output 			reg_wr2_enable;
-	output [15:00]	reg_wr1_data;
-	output [15:00]	reg_wr2_data;
-
-	output [05:00]	reg_rd1;
-	output [05:00]	reg_rd2;
-	//output [05:00]	reg_rd3;
-
-	// Data Register //
-
-	input [07:00]	data_rd1_out;
-	input [07:00]	data_rd2_out;
-	input [07:00]	data_rd3_out;
-	input [07:00]	data_rd4_out;
-
-	output [07:00] 	data_rd1;
-	output [07:00] 	data_rd2;
-	output [07:00] 	data_rd3;
-	output [07:00] 	data_rd4;
-
-	output [07:00] 	data_wr1;
-	output [07:00] 	data_wr2;
-	output [07:00]		data_wr3;
-	output [07:00]		data_wr4;
-	output [07:00] 	data_wr1_data;
-	output [07:00] 	data_wr2_data;
-	output [07:00] 	data_wr3_data;
-	output [07:00] 	data_wr4_data;
-	output			data_wr1_enable;
-	output			data_wr2_enable;
-	output			data_wr3_enable;
-	output 			data_wr4_enable;
-
-	output carrybit_wr;
-	output carrybit_wr_enable;
-
-	input carrybit;
+`include "aap.h"
 
 
-	// input [63:00]register;
+// This module can read (combinatorially) and write (sequentially) 3 registers
+// per clock cycle.
 
-	reg [05:00]	reg_wr1;
-	reg [05:00]	reg_wr2;
+module Execute (input         clk,
+		input 	      rst,
 
-	reg [05:00]	reg_rd1;
-	reg [05:00]	reg_rd2;
-	//reg [05:00]	reg_rd3;
+		// Register access
 
-	reg 		reg_wr1_enable;
-	reg 		reg_wr2_enable;
+		output [5:0]  rega_rregnum,
+		output [5:0]  rega_wregnum,
+		input [15:0]  rega_rdata,
+		output [15:0] rega_wdata,
+		output 	      rega_we,
 
-	reg [15:00] reg_wr1_data;
-	reg [15:00] reg_wr2_data;
+		output [5:0]  regb_rregnum,
+		output [5:0]  regb_wregnum,
+		input [15:0]  regb_rdata,
+		output [15:0] regb_wdata,
+		output 	      regb_we,
 
-	wire [05:00]operationnumber;
+		output [5:0]  regd_rregnum,
+		output [5:0]  regd_wregnum,
+		input [15:0]  regd_rdata,
+		output [15:0] regd_wdata,
+		output 	      regd_we,
 
-	reg [07:00] data_rd1;
-	reg [07:00] data_rd2;
-	reg [07:00] data_rd3;
-	reg [07:00] data_rd4;
+		// Memory access. Only set instruction reading.
 
-	reg [07:00]	data_wr1;
-	reg [07:00]	data_wr2;
-	reg [07:00]	data_wr3;
-	reg [07:00]	data_wr4;
-	reg [07:00]	data_wr1_data;
-	reg [07:00]	data_wr2_data;
-	reg [07:00]	data_wr3_data;
-	reg [07:00]	data_wr4_data;
-	reg			data_wr1_enable;
-	reg			data_wr2_enable;
-	reg			data_wr3_enable;
-	reg 		data_wr4_enable;
+		output [23:0] i_raddr,
+		input [15:0]  i_rdata,
 
-	wire 		carrybit;
+		output [15:0] d_raddr,
+		output [15:0] d_waddr,
+		input [7:0]   d_rdata,
+		output [7:0]  d_wdata,
+		output 	      d_we
+		);
 
-	reg [16:00] carryreg;
+   // The instruction currently being processed.
 
-	reg 		carrybit_wr;
-	reg 		carrybit_wr_enable;
-	
-	wire [05:00] destination;	
+   wire [31:0]  instr;
 
-	reg [08:00]	pcchange;
-	reg [02:00]	pcjumpenable;
-	reg [15:00]	pclocation;
+   // Processor state
 
-	wire 		super_duper_a;
-	wire 		super_duper_b;
-	
-	reg nop_stop;
+   reg [23:0]  next_pc;
+   wire [23:0] pc = next_pc;
 
+   reg [2:0]   next_state;
+   wire [2:0]  state = next_state ;
 
-	always @(posedge clock) begin
+   reg 	       next_carry;
+   wire	       carry = next_carry;
 
-		reg_wr1_enable = 0;
-		reg_wr2_enable = 0;
-		data_wr1_enable = 0;
-		data_wr2_enable = 0;
-		data_wr3_enable = 0;
-		data_wr4_enable = 0;
-		reg_rd1 = source_1;
-		reg_rd2 = source_2;
-	//	reg_rd3 = destination;
-		pcjumpenable = 0;
-		carrybit_wr_enable = 0;
-		
+   // Generic opcode fields. 0 top bits for 16-bit
 
+   wire [3:0]  opf_class   = {instr[14:13],instr[30:29]};
+   wire [7:0]  opf_opcode  = {instr[12:9],instr[28:25]};
+   wire [5:0]  opf_rd      = {instr[8:6],instr[24:22]};
+   wire [5:0]  opf_ra      = {instr[5:3],instr[21:19]};
+   wire [5:0]  opf_rb      = {instr[2:0],instr[18:16]};
 
-		if (operationnumber == 0) begin 	//no operation
-			if (unsigned_2 == 0) begin 	//breakpoint
-				nop_stop = 0;
+   // 16-bit instruction immediate fields.
+
+   // All signed fields are used for address calculation, so sign extended to
+   // 16 (for data addresses) or 24 bits (for instruction addresses).  This
+   // uses the formula ((x ^ n) - n) to sign extend from n bits, from the
+   // Magic Aggregate Algorithms. See
+
+   //   http://aggregate.org/MAGIC/#Sign%20Extension
+
+   // Note that there are two variations of the 3-bit signed immediate and
+   // there is a 32-bit variant of the 6-bit unsigned immediate.
+
+   wire [2:0]  opf_imm3    = instr[18:16];
+   wire [15:0] opf_simm3b  = (({13'b0,instr[18:16]} ^ 16'h4) - 16'h4);
+   wire [23:0] opf_simm3d  = (({21'b0,instr[24:22]} ^ 24'h4) - 24'h4);
+   wire [5:0]  opf_imm6_16 = instr[21:16];
+   wire [23:0] opf_simm6   = (({18'b0,instr[24:19]} ^ 24'h20) - 24'h20);
+   wire [23:0] opf_simm9   = (({15'b0,instr[24:16]} ^ 24'h100) - 24'h100);
+
+   // 32-bit instruction immediate fields.  All signed fields are again used
+   // for address calculation, so sign extended to 24 bits.
+
+   // Note that there are two variations of the 10-bit signed immediate
+
+/* -----\/----- EXCLUDED -----\/-----
+   wire [5:0]  opf_imm6_32 = {instr[2:0],instr[18:16]};
+   wire [8:0]  opf_imm9	   = {instr[12:10],instr[2:0],instr[18:16]};
+   wire [9:0]  opf_imm10   = {instr[12:9],instr[2:0],instr[18:16]};
+   wire [23:0] opf_simm10b = (({14'b0,instr[12:9],instr[2:0],instr[18:16]}
+			       ^ 24'h200) - 24'h200);
+   wire [23:0] opf_simm10d = (({14'b0,instr[12:6],instr[24:22]}
+			       ^ 24'h200) - 24'h200);
+   wire [11:0] opf_imm12   = {instr[5:0],instr[21:16]};
+   wire [15:0] opf_imm16   = {instr[12:9],instr[5:0],instr[21:16]};
+   wire [23:0] opf_simm16  = (({8'b0,instr[12:3],instr[24:19]}
+			       ^ 24'h8000) - 24'h8000);
+   wire [23:0] opf_simm22  = (({2'b0,instr[12:0],instr[24:16]}
+			       ^ 24'h200000) - 24'h200000);
+ -----/\----- EXCLUDED -----/\----- */
+
+   // Net to ignore
+
+   wire        dummy;
+
+   // Execute logic
+
+   always @(posedge clk) begin
+      if (rst == 1) begin
+	 next_carry <= 1'b0;
+      end
+      else begin
+	 case (state)
+
+	   `STATE_FETCH1: begin
+
+	      // 16-bit instruction or first part of 32-bit instruction.
+
+	      instr[31:16] <= i_rdata;
+	      i_raddr      <= pc + 1;
+	      next_state <= `STATE_FETCH2;
+	   end
+
+	   `STATE_FETCH2: begin
+
+	      // second part of 32-bit instruction. Zero if first part is
+	      // 16-bit.
+
+	      if (instr[31] == 0) begin
+		 // 16-bit instruction
+		 instr[15:0] <= 16'b0;
+	      end
+	      else begin
+		 // 32-bit instruction
+		 instr[15:0] <= i_rdata;
+	      end
+	      next_state <= `STATE_EXECUTE;
+
+	   end // case: `STATE_FETCH2
+
+	   `STATE_EXECUTE: begin
+
+	      rega_wregnum <= opf_rd;
+	      rega_we      <= 1;
+
+	      rega_rregnum <= opf_ra;
+	      regb_rregnum <= opf_rb;
+	      regd_rregnum <= opf_rd;
+
+	      if (instr[31] == 0) begin
+
+		 // 16-bit instructions
+
+		 case (opf_class[1:0])
+		   2'b00: begin
+
+		      // 16-bit ALU instructions, do the operation
+
+		      case (opf_opcode[3:0])
+			4'b0000: begin
+			   // NOP
 			end
 
-			
-		end
-		
-		if (operationnumber == 1) begin 	//unsigned add	
-			if (super_duper_a == 1) begin 	//unsigned add with carry ??
-				reg_wr1 = destination;
-				carryreg = reg_rd1_out + reg_rd2_out + carrybit;
-				reg_wr1_data = carryreg[15:00];
-				carrybit_wr = carryreg[16];
-			//	{carrybit,reg_wr1_data} = reg_rd1_out + reg_rd2_out + carrybit;
-				reg_wr1_enable = 1;
-				carrybit_wr_enable = 1;
+			4'b0001: begin
+			   // ADD
+			   {next_carry,regd_wdata} <= {1'b0,rega_rdata} +
+						      {1'b0,regb_rdata};
 			end
-			else begin
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out + reg_rd2_out;
-				reg_wr1_enable = 1;
-			end
-		end
-		if (operationnumber == 2) begin 	//unsigned subtract 	
-			if (super_duper_a == 1 ) begin 	//unsigned subtract with carry ????????????
-				reg_wr1 = destination;
-				carryreg = reg_rd1_out - reg_rd2_out - carrybit;
-				reg_wr1_data = carryreg[15:00];
-				carrybit_wr = carryreg[16];
-			//	{carrybit,reg_wr1_data} = reg_rd1_out + reg_rd2_out - carrybit;				
-				reg_wr1_enable = 1;
-				carrybit_wr_enable = 1;
-			end
-			else begin
-				reg_wr1 = destination;
-				//reg_wr1_data = reg_rd1_out - reg_rd2_out - carrybit;
-				reg_wr1_data = reg_rd1_out - reg_rd2_out;
-				reg_wr1_enable = 1;
-			end
-		end
-		if (operationnumber == 3) begin 	//bitwise AND 
-			if (super_duper_b == 1) begin 	//bitwise AND immediate
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out & unsigned_5;
-				reg_wr1_enable = 1;	
-			end
-			else begin
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out & reg_rd2_out;
-				reg_wr1_enable = 1;
-			end
-		end
-		if (operationnumber == 4) begin 	//bitwise OR
-			if (super_duper_b == 1) begin 	//bitwise OR immediate
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out | unsigned_5;
-				reg_wr1_enable = 1;
-			end
-			else begin
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out | reg_rd2_out;
-				reg_wr1_enable = 1;
-			end
-		end
-		if (operationnumber == 5) begin 	//bitwise exclusive OR
-			if (super_duper_b == 1) begin 	//bitwise exclusive OR immediate
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out ^ unsigned_5;
-				reg_wr1_enable = 1;
-			end
-			else begin
-				reg_wr1 = destination;
-				reg_wr1_data = reg_rd1_out ^ reg_rd2_out;
-				reg_wr1_enable = 1;
-			end
-		end
 
-		if (operationnumber == 6) begin 	// arithmetic shift right
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out >>> reg_rd2_out;
-			reg_wr1_enable = 1;
-			
-		end
-		if (operationnumber == 7) begin 	// Logical left shift
-			reg_wr1 = destination;
-			carryreg = reg_rd1_out << reg_rd2_out; 		// ??????????????????????????????????????????????????
-			carrybit_wr = carryreg[16];
-			reg_wr1_data = carryreg[15:00];
-			reg_wr1_enable = 1;
-			
-		end
+			4'b0010: begin
+			   // SUB
+			   {next_carry,regd_wdata} <= {1'b0,rega_rdata} -
+						      {1'b0,regb_rdata};
+			end
 
-		if (operationnumber == 8) begin 	// Logical right shift
-			reg_wr1 = destination;
-			carryreg = reg_rd1_out >> reg_rd2_out;
-			carrybit_wr = carryreg[0];
-			reg_wr1_data = carryreg[16:01];
-			reg_wr1_enable = 1;
-			
-		end
-		if (operationnumber == 9) begin 	// move register to register
-			reg_rd1 = source_1;
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out;
-			reg_wr1_enable = 1;
-		end
-		if (operationnumber == 10) begin 	//unsigned add immediate
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out + unsigned_1;
-			reg_wr1_enable = 1;
-			
-		end
-		if (operationnumber == 11) begin 	//unsigned subtract immediate
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out - unsigned_1;
-			reg_wr1_enable = 1;
-		end
-		if (operationnumber == 12) begin 	//arithmetic shift right immediate
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out >>> unsigned_1;
-				reg_wr1_enable = 1;
-		end
-		if (operationnumber == 13) begin 	//logical shift left immediate
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out << unsigned_1;
-			reg_wr1_enable = 1;	
-		end
+			4'b0011: begin
+			   // AND
+			   regd_wdata <= rega_rdata & regb_rdata;
+			end
 
-		if (operationnumber == 14) begin 	//logical shift right immediate
-			reg_wr1 = destination;
-			reg_wr1_data = reg_rd1_out >> unsigned_1;
-			reg_wr1_enable = 1;	
-		end
+			4'b0100: begin
+			   // OR
+			   regd_wdata <= rega_rdata | regb_rdata;
+			end
 
-		if (operationnumber == 15) begin 	//Move immeidate to register
-			reg_wr1 = destination;
-			reg_wr1_data = unsigned_2;
-			reg_wr1_enable = 1;
-		end
-		if (operationnumber == 16) begin 	//indexed load byte
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			reg_wr1_data[07:00] = data_rd1_out[07:00];
-			reg_wr1_enable = 1;
-			pcjumpenable = 0;
-		end
-		if (operationnumber == 17) begin 	//indexed load byte with predecrement
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out - 1;
-			reg_wr2_enable = 1;
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			reg_wr1_data[07:00] = data_rd1_out[07:00];
-			reg_wr1_enable = 1;
-		end
-		if (operationnumber == 18) begin 	//indexed load byte with postincrement
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			reg_wr1_data[07:00] = data_rd1_out[07:00];
-			reg_wr1_enable = 1;
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out + 1;
-			reg_wr2_enable = 1;
-		end
-		if (operationnumber == 20) begin 	//indexed load word
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			data_rd2 = (reg_rd1_out + unsigned_1 + 1);
-			reg_wr1_data[07:00] = data_rd1_out;
-			reg_wr1_data[15:08] = data_rd2_out;
-			reg_wr1_enable = 1;
-		end
-		if (operationnumber == 21) begin 	//indexed load word with predecrement
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out - 2;
-			reg_wr2_enable = 1;
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			data_rd2 = (reg_rd1_out + unsigned_1 + 1);
-			reg_wr1_data[07:00] = data_rd1_out;
-			reg_wr1_data[15:08] = data_rd2_out;
-			reg_wr1_enable = 1;
-		end
-		if (operationnumber == 22) begin 	//indexed load word with postincrement
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_rd1 = (reg_rd1_out + unsigned_1);
-			data_rd2 = (reg_rd1_out + unsigned_1 + 1);
-			reg_wr1_data[07:00] = data_rd1_out;
-			reg_wr1_data[15:08] = data_rd2_out;
-			reg_wr1_enable = 1;
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out + 2;
-			reg_wr2_enable = 1;
-		end
+			4'b0101: begin
+			   // XOR
+			   regd_wdata <= rega_rdata ^ regb_rdata;
+			end
 
-		if (operationnumber == 24) begin 	//indexed store byte
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data[07:00] = reg_rd1_out[07:00];
-			data_wr1_enable = 1;
+			4'b0110: begin
+			   // ASR - will discard top bit
+			   {dummy,regd_wdata} <= ({carry, rega_rdata} >>> regb_rdata);
 			end
-		if (operationnumber == 25) begin 	//indexed store byte with predecrement
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out - 1;
-			reg_wr2_enable = 1;			
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data[07:00] = reg_rd1_out[07:00];
-			data_wr1_enable = 1;
-		end
-		if (operationnumber == 26) begin 	//indexed store byte with postincrement
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data[07:00] = reg_rd1_out[07:00];
-			data_wr1_enable = 1;
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out + 1;
-			reg_wr2_enable = 1;
-		end
-		if (operationnumber == 28) begin 	//indexed store word
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data = (reg_rd1_out[07:00] + unsigned_1);
-			data_wr2 = (reg_rd1_out + unsigned_1 + 1);
-			data_wr2_data = (reg_rd1_out[15:08] + unsigned_1);
-			data_wr1_enable = 1;
-			data_wr2_enable = 1;
-		end
-		if (operationnumber == 29) begin 	//indexed store word with predecrement
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out - 2;
-			reg_wr2_enable = 1;			
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data = (reg_rd1_out[07:00] + unsigned_1);
-			data_wr2 = (reg_rd1_out + unsigned_1 + 1);
-			data_wr2_data = (reg_rd1_out[15:08] + unsigned_1);
-			data_wr1_enable = 1;
-			data_wr2_enable = 1;
-		end
-		if (operationnumber == 30) begin 	//indexed store word with postincrement
-			reg_wr1 = destination;
-			reg_rd1 = source_1;
-			data_wr1 = (reg_rd1_out + unsigned_1);
-			data_wr1_data = (reg_rd1_out[07:00] + unsigned_1);
-			data_wr2 = (reg_rd1_out + unsigned_1 + 1);
-			data_wr2_data = (reg_rd1_out[15:08] + unsigned_1);
-			data_wr1_enable = 1;
-			data_wr2_enable = 1;
-			reg_rd2 = source_1;
-			reg_wr2 = source_1;
-			reg_wr2_data = reg_rd2_out + 2;
-			reg_wr2_enable = 1;
-		end
 
-		if (operationnumber == 32) begin        //relative branch
-			pcchange = signed_1;
-			pcjumpenable = 1;
-		end
-		if (operationnumber == 33) begin        //relative branch and link
-			pcchange = signed_2;
-			reg_wr1 = source_1;
-			reg_wr1_data = previous_programcounter;
-			pcjumpenable = 4;
-		end
-		if (operationnumber == 34) begin        //relative branch if equal
-			if (source_1 == source_2) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
+			4'b0111: begin
+			   // LSL
+			   regd_wdata <= rega_rdata << regb_rdata;
 			end
-		end
 
-		if (operationnumber == 35) begin        //relative branch if not equal
-			if (source_1 !== source_2) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
+			4'b1000: begin
+			   // LSR
+			   regd_wdata <= rega_rdata >> regb_rdata;
 			end
-		end
-		if (operationnumber == 36) begin        //relative branch if signed less than
-			if ($signed(source_1) < $signed (source_2)) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-		if (operationnumber == 37) begin        //relative branch if signed greater than
-			if ($signed(source_1) > $signed(source_2)) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-		if (operationnumber == 38) begin        //relative branch if unsigned less than
-			if (source_1 < source_2) begin
-				pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-		if (operationnumber == 39) begin        //relative branch if unsigned greater than
-			if (source_1 > source_2) begin
-			pcchange = signed_3;
-				pcjumpenable = 1;
-			end
-		end
-		
 
-		if (operationnumber == 40) begin        //absolute jump
-			if (super_duper_a == 1) begin 		//absolute jump long
-				pcjumpenable = 2;
-				reg_rd1 = destination;
-				reg_rd2 = destination + 1;
-				pclocation[07:00] = reg_rd1_out;
-				pclocation[15:08] = reg_rd2_out;
+			4'b1001: begin
+			   // MOV
+			   regd_wdata <= rega_rdata;
 			end
-			else begin
-				reg_rd1 = destination;
-				pclocation = reg_rd1_out;
-				pcjumpenable = 2;
-			end
-		end
-		if (operationnumber == 41) begin 		//absolute jump and link
-			if (super_duper_a == 1) begin 		//absolute jump long and link
-				pcjumpenable = 2;
-				reg_rd1 = destination;
-				reg_rd2 = destination + 1;
-				pclocation[07:00] = reg_rd1_out;
-				pclocation[15:08] = reg_rd2_out;
-				reg_wr1 = source_1;
-				reg_wr1_data = previous_programcounter;
-				reg_wr1_enable = 1;
-			end
-			else begin
-				reg_rd1 = destination;
-				pclocation = reg_rd1_out;
-				pcjumpenable = 3;
-				reg_wr1 = source_1;
-				reg_wr1_data = previous_programcounter;
-				reg_wr1_enable = 1;
-			end
-			//pclocation <= previous_programcounter;
-		end
-		if (operationnumber == 42) begin        //absolute jump if equal
-			if (source_1 == source_2) begin 	//absolute jump long if equal
-				if (super_duper_a == 1) begin
-					pcjumpenable = 2;
-					reg_rd1 = destination;
-					reg_rd2 = destination + 1;
-					pclocation[07:00] = reg_rd1_out;
-					pclocation[15:08] = reg_rd2_out;
-				end
-				else begin
-					reg_rd1 = destination;
-					pclocation = reg_rd1_out;
-					pcjumpenable = 2;
-				end
-			end
-		end
-		if (operationnumber == 43) begin        //absolute jump if not equal
-			if (source_1 !== source_2) begin
-				if (super_duper_a == 1) begin	//absolute jump long if not equal
-					pcjumpenable = 2;
-					reg_rd1 = destination;
-					reg_rd2 = destination + 1;
-					pclocation[07:00] = reg_rd1_out;
-					pclocation[15:08] = reg_rd2_out;
-				end
-				else begin
-					reg_rd1 = destination;
-					pclocation = reg_rd1_out;
-					pcjumpenable = 2;
-				end
-			end
-		end
-		if (operationnumber == 44) begin        //absolute jump if signed less than
-			if ($signed(source_1) < $signed(source_2)) begin
-				if (super_duper_a == 1) begin //absolute jump long if unsigned less than
-					pcjumpenable = 2;
-					reg_rd1 = destination;
-					reg_rd2 = destination + 1;
-					pclocation[07:00] = reg_rd1_out;
-					pclocation[15:08] = reg_rd2_out;
-				end
-				else begin
-					reg_rd1 = destination;
-					pclocation = reg_rd1_out;
-					pcjumpenable = 2;
-				end
-			end
-		end
-		if (operationnumber == 45) begin        //absolute jump if signed greater than
-			if ($signed(source_1) > $signed(source_2)) begin
-				if (super_duper_a == 1) begin //absolute jump long if signed greater than
-					pcjumpenable = 2;
-					reg_rd1 = destination;
-					reg_rd2 = destination + 1;
-					pclocation[07:00] = reg_rd1_out;
-					pclocation[15:08] = reg_rd2_out;
-				end
-				else begin
-					reg_rd1 = destination;
-					pclocation = reg_rd1_out;
-					pcjumpenable = 2;
-				end
-			end
-		end
 
-		if (operationnumber == 46) begin        //absolute jump if unsigned less than
-			if (source_1 < source_2) begin
-				if (super_duper_a == 1) begin //absolute jump long if unsigned less than
-					pcjumpenable = 2;
-					reg_rd1 = destination;
-					reg_rd2 = destination + 1;
-					pclocation[07:00] = reg_rd1_out;
-					pclocation[15:08] = reg_rd2_out;
-				end
-				else begin
-					reg_rd1 = destination;
-					pclocation = reg_rd1_out;
-					pcjumpenable = 2;
-				end
+			4'b1010: begin
+			   // ADDI
+			   {next_carry,regd_wdata} <= {1'b0,rega_rdata} +
+						      {14'b0,opf_imm3};
 			end
-		end
-		if (operationnumber == 47) begin        //absolute jump if unsigned greater than
-			if (source_1 > source_2) begin
-				if (super_duper_a == 1) begin //absolute jump long if unsigned greater than
-					pcjumpenable = 2;
-					reg_rd1 = destination;
-					reg_rd2 = destination + 1;
-					pclocation[07:00] = reg_rd1_out;
-					pclocation[15:08] = reg_rd2_out;
-				end
-				else begin
-					reg_rd1 = destination;
-					pclocation = reg_rd1_out;
-					pcjumpenable = 2;
-				end
+
+			4'b1011: begin
+			   // SUBI
+			   {next_carry,regd_wdata} <= {1'b0,rega_rdata} -
+						      {14'b0,opf_imm3};
 			end
-		end
-		
-	end
+
+			4'b1100: begin
+			   // ASRI - will discard top bit.
+			   {dummy,regd_wdata} <= ({carry, rega_rdata} >>> opf_imm3);
+			end
+
+			4'b1101: begin
+			   // LSLI
+			   regd_wdata <= rega_rdata << opf_imm3;
+			end
+
+			4'b1110: begin
+			   // LSR
+			   regd_wdata <= rega_rdata >> opf_imm3;
+			end
+
+			4'b1111: begin
+			   // MOVI
+			   regd_wdata <= {10'b0,opf_imm6_16};
+			end
+		      endcase // case (opf_opcode)
+
+		      // Advance the program counter
+
+		      i_raddr <= pc + 1;
+		      next_pc <= pc + 1;
+		      next_state <= `STATE_FETCH1;
+
+		   end // case: 2'b00
+
+		   2'b01: begin
+
+		      //16-bit load/store instructions.
+
+		      case (opf_opcode[3:2])
+			2'b00: begin
+
+			   // Byte loads take one more cycle
+
+			   case (opf_opcode[1:0])
+			     2'b00: begin
+				// Indexed load byte
+				d_raddr <= rega_rdata + opf_simm3b;
+			     end
+
+			     2'b01: begin
+				// Indexed load byte with postinc
+				d_raddr <= rega_rdata + opf_simm3b;
+				// Inc the index reg
+				rega_wregnum <= opf_ra;
+				rega_wdata   <= rega_rdata + 1;
+				rega_we      <= 1;
+			     end
+
+			     2'b10: begin
+				// Indexed load byte with predec
+				d_raddr <= rega_rdata + opf_simm3b - 1;
+				// Dec the index reg
+				rega_wregnum <= opf_ra;
+				rega_wdata   <= rega_rdata - 1;
+				rega_we      <= 1;
+			     end
+
+			     2'b11: begin
+				// Invalid, do nothing
+			     end
+			   endcase // case (opf_opcode[1:0])
+
+			   next_state <= `STATE_WRITEBACK;
+
+			end // case: 2'b00
+
+			2'b01: begin
+
+			   // Word loads take two more cycles
+
+			   case (opf_opcode[1:0])
+			     2'b00: begin
+				// Indexed load word
+				d_raddr <= rega_rdata + opf_simm3b;
+			     end
+
+			     2'b01: begin
+				// Indexed load word with postinc
+				d_raddr <= rega_rdata + opf_simm3b;
+				// Inc the index reg
+				rega_wregnum <= opf_ra;
+				rega_wdata   <= rega_rdata + 2;
+				rega_we      <= 1;
+			     end
+
+			     2'b10: begin
+				// Indexed load word with predec
+				d_raddr <= rega_rdata + opf_simm3b - 2;
+				// Dec the index reg
+				rega_wregnum <= opf_ra;
+				rega_wdata   <= rega_rdata - 2;
+				rega_we      <= 1;
+			     end
+
+			     2'b11: begin
+				// Invalid, do nothing
+			     end
+			   endcase // case (opf_opcode[1:0])
+
+			   next_state <= `STATE_WRITEBACK;
+
+			end // case: 2'b01
+
+			2'b10: begin
+
+			   // Byte stores complete in this cycle.
+
+			   case (opf_opcode[1:0])
+			     2'b00: begin
+				// Indexed store byte
+				d_waddr <= regd_rdata + opf_simm3b;
+				d_wdata <= rega_rdata[7:0];
+				d_we    <= 1;
+			     end
+
+			     2'b01: begin
+				// Indexed store byte with postinc
+				d_waddr <= regd_rdata + opf_simm3b;
+				d_wdata <= rega_rdata[7:0];
+				d_we    <= 1;
+				// Inc the index reg
+				regd_wregnum <= opf_rd;
+				regd_wdata   <= regd_rdata + 1;
+				regd_we      <= 1;
+			     end
+
+			     2'b10: begin
+				// Indexed store byte with predec
+				d_waddr <= regd_rdata + opf_simm3b - 1;
+				d_wdata <= rega_rdata[7:0];
+				d_we    <= 1;
+				// Dec the index reg
+				regd_wregnum <= opf_rd;
+				regd_wdata   <= regd_rdata - 1;
+				regd_we      <= 1;
+			     end
+
+			     2'b11: begin
+				// Invalid
+			     end
+			   endcase // case (opf_opcode[2:1])
+
+			   i_raddr    <= pc + 1;
+			   next_pc    <= pc + 1;
+			   next_state <= `STATE_FETCH1;
+
+			end // case: 2'b10
+
+			2'b11: begin
+
+			   // Word stores need one more cycle.
+
+			   case (opf_opcode[1:0])
+			     2'b00: begin
+				// Indexed store word
+				d_waddr <= regd_rdata + opf_simm3b;
+				d_wdata <= rega_rdata[7:0];	// LSB
+				d_we    <= 1;
+			     end
+
+			     2'b01: begin
+				// Indexed store word with postinc
+				d_waddr <= regd_rdata + opf_simm3b;
+				d_wdata <= rega_rdata[7:0];	// LSB
+				d_we    <= 1;
+				// Inc the index reg
+				regd_wregnum <= opf_rd;
+				regd_wdata   <= regd_rdata + 2;
+				regd_we      <= 1;
+			     end
+
+			     2'b10: begin
+				// Indexed store word with predec
+				d_waddr <= regd_rdata + opf_simm3b - 2;
+				d_wdata <= rega_rdata[7:0];	// LSB
+				d_we    <= 1;
+				// Dec the index reg
+				regd_wregnum <= opf_rd;
+				regd_wdata   <= regd_rdata - 2;
+				regd_we      <= 1;
+			     end
+
+			     2'b11: begin
+				// Invalid
+			     end
+			   endcase // case (opf_opcode[1:0])
+
+			   next_state <= `STATE_WRITEBACK;
+
+			end // case: 2'b11
+
+		      endcase // case (opf_opcode[3:2])
+
+		   end // case: 2'b01
+
+		   2'b10: begin
+
+		      // 16-bit flow of control instructions
+
+		      case (opf_opcode[3:0])
+			4'b0000: begin
+			   // Relative branch
+			   next_pc <= pc + $signed (opf_simm9);
+			   i_raddr <= pc + $signed (opf_simm9);
+			end
+
+			4'b0001: begin
+			   // Relative branch and link, first save the
+			   // link. Remember only 16-bits of instr address
+			   regb_wregnum <= opf_rb;
+			   regb_wdata   <= pc[15:0] + 1;
+			   regb_we      <= 1;
+			   // Relative branch
+			   next_pc <= pc + $signed (opf_simm6);
+			   i_raddr <= pc + $signed (opf_simm6);
+			end
+
+			4'b0010: begin
+			   // Relative branch if equal
+			   if (rega_rdata == regb_rdata) begin
+			      next_pc <= pc + opf_simm3d;
+			      i_raddr <= pc + opf_simm3d;
+			   end
+			   else begin
+			      next_pc <= pc + 1;
+			      i_raddr <= pc + 1;
+			   end
+			end // case: 4'b0010
+
+			4'b0011: begin
+			   // Relative branch if not equal
+			   if (rega_rdata != regb_rdata) begin
+			      next_pc <= pc + opf_simm3d;
+			      i_raddr <= pc + opf_simm3d;
+			   end
+			   else begin
+			      next_pc <= pc + 1;
+			      i_raddr <= pc + 1;
+			   end
+			end // case: 4'b0011
+
+			4'b0100: begin
+			   // Relative branch if signed less than
+			   if ($signed(rega_rdata) < $signed(regb_rdata)) begin
+			      next_pc <= pc + opf_simm3d;
+			      i_raddr <= pc + opf_simm3d;
+			   end
+			   else begin
+			      next_pc <= pc + 1;
+			      i_raddr <= pc + 1;
+			   end
+			end // case: 4'b0100
+
+
+			4'b0101: begin
+			   // Relative branch if signed less than or equal
+			   if ($signed(rega_rdata) <= $signed(regb_rdata)) begin
+			      next_pc <= pc + opf_simm3d;
+			      i_raddr <= pc + opf_simm3d;
+			   end
+			   else begin
+			      next_pc <= pc + 1;
+			      i_raddr <= pc + 1;
+			   end
+			end // case: 4'b0101
+
+			4'b0110: begin
+			   // Relative branch if unsigned less than
+			   if (rega_rdata < regb_rdata) begin
+			      next_pc <= pc + opf_simm3d;
+			      i_raddr <= pc + opf_simm3d;
+			   end
+			   else begin
+			      next_pc <= pc + 1;
+			      i_raddr <= pc + 1;
+			   end
+			end // case: 4'b0110
+
+			4'b0111: begin
+			   // Relative branch if unsigned less than or equal
+			   if (rega_rdata <= regb_rdata) begin
+			      next_pc <= pc + opf_simm3d;
+			      i_raddr <= pc + opf_simm3d;
+			   end
+			   else begin
+			      next_pc <= pc + 1;
+			      i_raddr <= pc + 1;
+			   end
+			end // case: 4'b0111
+
+			4'b1000: begin
+			   // Absolute jump
+			   next_pc[15:0] <= regd_rdata;
+			   i_raddr[15:0] <= regd_rdata;
+			end
+
+			4'b1001: begin
+			   // Absolute jump and link, first save the link (16-bit
+			   // only)
+			   regb_wregnum <= opf_rb;
+			   regb_wdata   <= pc[15:0] + 1;
+			   regb_we      <= 1;
+			   // Absolute jump
+			   next_pc[15:0] <= regd_rdata;
+			   i_raddr[15:0] <= regd_rdata;
+			end
+
+			4'b1010: begin
+			   // Absolute jump if equal
+			   if (rega_rdata == regb_rdata) begin
+			      next_pc[15:0] <= regd_rdata;
+			      i_raddr[15:0] <= regd_rdata;
+			   end
+			   else begin
+			      next_pc[15:0] <= pc[15:0] + 1;
+			      i_raddr[15:0] <= pc[15:0] + 1;
+			   end
+			end // case: 4'b1010
+
+			4'b1011: begin
+			   // Absolute jump if not equal
+			   if (rega_rdata != regb_rdata) begin
+			      next_pc[15:0] <= regd_rdata;
+			      i_raddr[15:0] <= regd_rdata;
+			   end
+			   else begin
+			      next_pc[15:0] <= pc[15:0] + 1;
+			      i_raddr[15:0] <= pc[15:0] + 1;
+			   end
+			end // case: 4'b1011
+
+			4'b1100: begin
+			   // Aboslute jump if signed less than
+			   if ($signed(rega_rdata) < $signed(regb_rdata)) begin
+			      next_pc[15:0] <= regd_rdata;
+			      i_raddr[15:0] <= regd_rdata;
+			   end
+			   else begin
+			      next_pc <= pc + 1;
+			      i_raddr <= pc + 1;
+			   end
+			end
+
+			4'b1101: begin
+			   // Aboslute jump if signed less than or equal
+			   if ($signed(rega_rdata) <= $signed(regb_rdata)) begin
+			      next_pc[15:0] <= regd_rdata;
+			      i_raddr[15:0] <= regd_rdata;
+			   end
+			   else begin
+			      next_pc[15:0] <= pc[15:0] + 1;
+			      i_raddr[15:0] <= pc[15:0] + 1;
+			   end
+			end // case: 4'b1101
+
+			4'b1110: begin
+			   // Aboslute jump if unsigned less than
+			   if (rega_rdata < regb_rdata) begin
+			      next_pc[15:0] <= regd_rdata;
+			      i_raddr[15:0] <= regd_rdata;
+			   end
+			   else begin
+			      next_pc[15:0] <= pc[15:0] + 1;
+			      i_raddr[15:0] <= pc[15:0] + 1;
+			   end
+			end // case: 4'b1110
+
+			4'b1111: begin
+			   // Aboslute jump if unsigned less than or equal
+			   if (rega_rdata <= regb_rdata) begin
+			      next_pc[15:0] <= regd_rdata;
+			      i_raddr[15:0] <= regd_rdata;
+			   end
+			   else begin
+			      next_pc[15:0] <= pc[15:0] + 1;
+			      i_raddr[15:0] <= pc[15:0] + 1;
+			   end
+			end // case: 4'b1111
+
+		      endcase // case (opf_class)
+
+		      next_state <= `STATE_FETCH1;
+
+		   end // case: 2'b10
+
+		   2'b11: begin
+
+		      // Miscellaneous 16-bit operations. Only have one and
+		      // ignore the rest.
+
+		      if (opf_opcode[3:0] == 4'b0000) begin
+			 next_pc[15:0] <= regd_rdata;
+			 i_raddr[15:0] <= regd_rdata;
+		      end
+		   end
+
+		 endcase // case (opf_class)
+	      end // if (instr[31] == 0)
+	      else begin
+
+		 // 32-bit instructions
+
+	      end // else: !if(instr[31] == 0)
+
+	   end // case: `STATE_EXECUTE
+
+	 endcase // case (state)
+
+      end // if (rst != 1)
+
+   end // always @ (posedge clk)
 
 endmodule
