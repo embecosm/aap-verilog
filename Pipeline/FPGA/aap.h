@@ -13,7 +13,5 @@
 // MERCHANTABILITY, SATISFACTORY QUALITY AND FITNESS FOR A PARTICULAR
 // PURPOSE. Please see the CERN OHL v.1.2 for applicable conditions
 
-`define STATE_FETCH1    0
-`define STATE_FETCH2    1
-`define STATE_EXECUTE   2
-`define STATE_WRITEBACK 3
+`define STATE_FETCH     2'b00
+`define STATE_EXECUTE   2'b01

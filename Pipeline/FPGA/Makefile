@@ -15,10 +15,11 @@
 
 PCF = aap.pcf
 
-SRC = Memory.v            \
-      MyStorm.v           \
-      Execute.v           \
-      RegisterFile.v
+SRC = MyStorm.v       \
+      Memory.v        \
+      RegisterFile.v  \
+      Fetch.v         \
+      Execute.v
 
 HDR = aap.h
 

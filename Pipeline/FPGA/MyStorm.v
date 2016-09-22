@@ -24,6 +24,58 @@
 // 12.5MHz.  This allows us to read/write both instruction and data memory
 // each cycle by using the 50MHz clock.
 
+// Each instruction takes multiple cycles, controlled by a state machine. The
+// state machine is advanced at the start of each cycle based on the state at
+// the end of the previous cycle.  Actions are associated with the transition
+// change. i.e. this is a Moore machine.
+
+// Transitions are as follows.
+
+// `STATE_EXECUTE -> `STATE_FETCH
+
+//     Condition: if previous cycle indicated execution was complete.
+//     Action: Fetch one word from instruction memory
+
+// `STATE_FETCH -> `STATE_FETCH
+
+//     Condition: if previous cycle indicated another instruction needed to be
+//                fetched.
+//     Action: Fetch a further word from instruction memory
+
+// `STATE_FETCH -> `STATE_EXECUTE
+
+//     Condition: if previous cycle indicated no more instructions needed to
+//                be fetched
+//     Action: Execute functional behavior of instruction and prepare any
+//             reads/writes.
+
+// `STATE_EXECUTE -> `STATE_EXECUTE
+
+//     Condition: if previous cycle indicated more cycles were needed for
+//                evaluation
+//     Action: Continue functional behavior of instruction
+
+// Modules are:
+
+// Memory
+//     Implements combinatorial read access and sequential write access to
+//     RAM for instruction memory and data memory.
+
+// RegisterFile
+//     Implements three read and three write port register
+//     memory. Combinatorial read and sequential write.
+
+// Fetch
+//     Gets the instruction from memory
+
+// Execute
+//     Executes the behavior of the opcode
+
+// Our major clock speed is one quarter the speed of the master clock. This
+// allows us to use the external SRAM for simulataneous data and instruction
+// access to by clocking it with the master clock.
+
+
 module MyStorm ( input         CLOCK_50, // 50 MHz Clock
                  input         RESET,    // Posedge reset
 
@@ -77,20 +129,13 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
    //  SRAM declarations
    //=======================================================
 
-/* -----\/----- EXCLUDED -----\/-----
-   reg [17:0] RAM_A;
-   reg [15:0] RAM_D;
-   reg 	      RAM_OE;
-   reg 	      RAM_WE;
- -----/\----- EXCLUDED -----/\----- */
-
    // Instruction and data memory ports
 
-   reg [23:0] i_raddr;
-//   reg [23:0] i_waddr;
+   reg [23:0] i_raddr;			// Only ever driven by `STATE_FETCH
+   reg [23:0] i_waddr;
    reg [15:0] i_rdata;
-//   reg [15:0] i_wdata;
-//   reg        i_we;
+   reg [15:0] i_wdata;
+   reg        i_we;
 
    reg [15:0] d_raddr;
    reg [15:0] d_waddr;
@@ -98,76 +143,33 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
    reg [7:0]  d_wdata;
    reg        d_we;
 
-   // Other memory ports
-
-/* -----\/----- EXCLUDED -----\/-----
-   wire [31:0] fetchoutput;
-   wire [5:0]  operationnumber;
-   reg         opcodemem;
-
-   wire [5:0]  source_1;
-   wire [5:0]  source_2;
-
-   wire [21:0] signed_1;
-   wire [15:0] signed_2;
-   wire [9:0]  signed_3;
-
-   wire [5:0]  unsigned_1;
-   wire [15:0] unsigned_2;
-   wire [8:0]  unsigned_3;
-   wire [9:0]  unsigned_4;
-   wire [8:0]  unsigned_5;
-
-   wire [5:0]  i_rd1_addr;
-   wire [5:0]  i_rd2_addr;
-   wire [15:0] i_rd1_out;
-   wire [15:0] i_rd2_out;
-
-   wire [8:0]  pcchange;
-   wire [5:0]  pclocation;
-
-   wire [2:0]  pcjumpenable;
-
-   reg [15:0]  fetch1;
-   reg [15:0]  fetch2;
-
-   wire        uart_reset;
-   wire        uart_stop;
-   wire        uart_continue;
-   wire        uart_step_en;
-   wire [5:0]  uart_step_volume;
- -----/\----- EXCLUDED -----/\----- */
-
-   reg         CLOCK_12_5;              // Slower speed clock
+   reg         clk_slow;		// Slower speed clock
    reg [1:0]   clk_phase;
 
-   // Missing declarations
-
-/* -----\/----- EXCLUDED -----\/-----
-   wire        nop_stop;
-   wire        flush;
-   wire        super_duper_a;
-   wire        super_duper_b;
- -----/\----- EXCLUDED -----/\----- */
-
    // Processor state:
-   // - two fetch states (decode is combinatorial)
+   // - one fetch state
    // - one execute state
    // - one writeback state
+
+   reg [1:0]   state;
+
+   // Instruction, driven during fetch (which owns the register)
+
+   wire [31:0] instr;
+
+   // Program counter, driven during execute (which owns the register)
+
+   wire [23:0]  pc;
+
+   // Progress in modules
+
+   wire 	fetch_done;
+   wire 	exec_done;
+   wire 	wb_done;
 
    // RAM is always accessible
 
    assign RAM_CS = 1'b1;
-
-   // Place holders
-/* -----\/----- EXCLUDED -----\/-----
-   assign LED = {KEY,1'b1};
-   assign UART_TX = UART_RX;
- -----/\----- EXCLUDED -----/\----- */
-
-   //=======================================================
-   //  Structural coding
-   //=======================================================
 
    //=====================================
    //      Slow Clock
@@ -180,7 +182,7 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
       end
       else begin
 	 if (clk_phase[0] == 1) begin
-            CLOCK_12_5 <= ~CLOCK_12_5;
+            clk_slow <= ~clk_slow;
 	 end
 	 else begin
             // Otherwise increment the counter
@@ -203,10 +205,10 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
 		    .ram_oe    (RAM_OE),
 		    .ram_we    (RAM_WE),
 		    .i_raddr   (i_raddr),
-		    // .i_waddr   (i_waddr),
+		    .i_waddr   (i_waddr),
 		    .i_rdata   (i_rdata),
-		    // .i_wdata   (i_wdata),
-		    // .i_we      (i_we),
+		    .i_wdata   (i_wdata),
+		    .i_we      (i_we),
 		    .d_raddr   (d_raddr),
 		    .d_waddr   (d_waddr),
 		    .d_rdata   (d_rdata),
@@ -216,7 +218,7 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
    // Instantiate the RegisterFile. This can read and write three instructions
    // in each slow clock cycle.
 
-   RegisterFile i_RegisterFile (.clk          (CLOCK_12_5),
+   RegisterFile i_RegisterFile (.clk          (clk_slow),
 				.rst          (RESET),
 				.rega_rregnum (rega_rregnum),
 				.rega_wregnum (rega_wregnum),
@@ -234,10 +236,26 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
 				.regd_wdata   (regd_wdata),
 				.regd_we      (regd_we) );
 
+   // Instantiate the fetch engine
+
+   Fetch i_Fetch (.clk        (clk_slow),
+		  .rst        (RESET),
+		  .state      (state),
+		  .instr      (instr),
+		  .pc         (pc),
+		  .fetch_done (fetch_done),
+		  .i_raddr    (i_raddr),
+		  .i_rdata    (i_rdata) );
+
    // Instantiate the execute engine
 
-   Execute i_Execute (.clk          (CLOCK_12_5),
+   Execute i_Execute (.clk          (clk_slow),
                       .rst          (RESET),
+		      .state        (state),
+		      .instr        (instr),
+		      .pc           (pc),
+		      .fetch_done   (fetch_done),
+		      .exec_done    (exec_done),
 		      .rega_rregnum (rega_rregnum),
 		      .rega_wregnum (rega_wregnum),
 		      .rega_rdata   (rega_rdata),
@@ -253,18 +271,51 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
 		      .regd_rdata   (regd_rdata),
 		      .regd_wdata   (regd_wdata),
 		      .regd_we      (regd_we),
-		      .i_raddr      (i_raddr),
-		      .i_rdata      (i_rdata),
 		      .d_raddr      (d_raddr),
 		      .d_waddr      (d_waddr),
 		      .d_rdata      (d_rdata),
 		      .d_wdata      (d_wdata),
 		      .d_we         (d_we) );
 
+   // Update the state machine
+
+   always @(posedge clk_slow) begin
+      if (RESET == 1'b1) begin
+	 state <= `STATE_EXECUTE;
+      end
+      else begin
+	 case (state)
+	   `STATE_EXECUTE: begin
+
+	      // Only advance if execution has completed
+
+	      if (exec_done == 1'b1) begin
+		 state <= `STATE_FETCH;
+	      end
+	   end // case: `STATE_EXECUTE
+
+	   `STATE_FETCH: begin
+
+	      // Only advance if we have finished fetching
+
+	      if (fetch_done == 1'b1) begin
+		 state <= `STATE_EXECUTE;
+	      end
+	   end
+
+	   default: begin
+
+	      // Should never happen. Do nothing
+
+	   end
+	 endcase // case (state)
+      end // else: !if(RESET == 1'b1)
+   end // always @ (posedge clk)
+
       //Instantiate the uart
 /* -----\/----- EXCLUDED -----\/-----
    uart
-     i_uart (.clock                   (CLOCK_12_5),
+     i_uart (.clock                   (clk_slow),
              .superclock              (CLOCK_50),
              .reset                   (RESET),
              .UART_TX                 (UART_TX),

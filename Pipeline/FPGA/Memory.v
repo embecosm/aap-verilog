@@ -48,10 +48,10 @@ module Memory (input         clk50,
 	       // Instruction ports (128Kword avail, so [16:0] actually used)
 
 	       input [23:0]  i_raddr,
-	       // input [23:0]  i_waddr,
+	       input [23:0]  i_waddr,
 	       output [15:0] i_rdata,
-	       // input [15:0]  i_wdata,
-	       // input 	     i_we,
+	       input [15:0]  i_wdata,
+	       input 	     i_we,
 
 	       // Data ports (64Kbyte)
 

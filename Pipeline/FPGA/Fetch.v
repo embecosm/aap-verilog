@@ -27,10 +27,10 @@
 module Fetch (input         clk,
 	      input 	    rst,
 
+	      input [1:0]   state,       // Processor state
 	      output [31:0] instr,       // Instruction fetched
-	      input [2:0]   state,       // Processor state
-	      output [2:0]  next_state,  // Processor state
 	      input [23:0]  pc,          // Program counter
+	      output 	    fetch_done,  // When we finish fetching
 
 	      // Memory access
 
@@ -38,15 +38,40 @@ module Fetch (input         clk,
 	      input [15:0]  i_rdata
 	      );
 
+   // We own the instruction register
+
    reg [31:0]  instr;
+
+   // Fetch is complete if the top bit of the first 16-bits we read was 1'b0
+   // or we have read 32 bits. We have no mechanism to read more than 32-bits.
+
+   reg 	       fetch_done;
 
    // Fetch an instruction
 
    always @(posedge clk) begin
-      if (rst != 1) begin
+      if (rst == 1) begin
+	 instr      <= 32'b0;
+	 fetch_done <= 1'b0;
+      end
+      else begin
 	 case (state)
+	   `STATE_FETCH: begin
+
+	      // Read second word of instruction. We are always done after
+	      // this.
+
+	      i_raddr     <= pc + 1;
+	      instr[15:0] <= i_rdata;
+	      fetch_done  <= 1'b1;
+	   end
+
 	   default: begin
-	     // Nothing to do in other states
+
+	      // In other states, just reinforce that fetch is complete.
+
+	      fetch_done  <= 1'b1;
+
 	   end
 	 endcase // case (state)
 
