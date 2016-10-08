@@ -2,3 +2,7 @@
 aap.bin
 aap.blif
 aap.txt
+# VCD
+*.vcd
+# Verilator output
+obj_dir

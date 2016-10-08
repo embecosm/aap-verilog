@@ -27,8 +27,8 @@ set_io CLOCK_50 129
 #set_io KEY[1] 64
 
 # UART
-#set_io UART_RX 96
-#set_io UART_TX 97
+set_io UART_RX 96
+set_io UART_TX 97
 
 # External RAM (256k x 16-bit)
 set_io RAM_CS 136

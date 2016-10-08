@@ -15,43 +15,64 @@
 // PURPOSE. Please see the CERN OHL v.1.2 for applicable conditions
 
 
+`include "aap.h"
+
+
 // Read 3 regs and the carry bit and write 3 regs and the carry bit each cycle
 
 module RegisterFile (input         clk,
-		     input         rst,
+		     input 	   rst,
+
+		     // Processor state
+
+		     input [2:0]   state,
+
+		     // Ordinary registers
 
 		     input [5:0]   rega_rregnum,
 		     input [5:0]   rega_wregnum,
 		     output [15:0] rega_rdata,
 		     input [15:0]  rega_wdata,
-		     input         rega_we,
+		     input 	   rega_we,
 
 		     input [5:0]   regb_rregnum,
 		     input [5:0]   regb_wregnum,
 		     output [15:0] regb_rdata,
 		     input [15:0]  regb_wdata,
-		     input         regb_we,
+		     input 	   regb_we,
 
 		     input [5:0]   regd_rregnum,
 		     input [5:0]   regd_wregnum,
 		     output [15:0] regd_rdata,
 		     input [15:0]  regd_wdata,
-		     input         regd_we);
+		     input 	   regd_we,
 
-   // Registers //
-   reg [15:0]  register [63:0];
+		     // Debug register access
+
+		     input [5:0]   dbg_reg_rregnum,
+		     input [5:0]   dbg_reg_wregnum,
+		     output [15:0] dbg_reg_rdata,
+		     input [15:0]  dbg_reg_wdata,
+		     input 	   dbg_reg_we);
+
+   // Registers
+
+   reg [15:0]  register [15:0];		// Only 16 regs
+   wire [15:0] reg0 = register[0];	// For debugging
 
    // Read logic
    // This is combinatoral, this happens continuously
 
-   assign rega_rdata = register[rega_rregnum];
-   assign regb_rdata = register[regb_rregnum];
-   assign regd_rdata = register[regd_rregnum];
+   assign rega_rdata    = register[rega_rregnum];
+   assign regb_rdata    = register[regb_rregnum];
+   assign regd_rdata    = register[regd_rregnum];
+   assign dbg_reg_rdata = register[dbg_reg_rregnum];
 
    // Write logic //
+
    // This is sequential, it will only happen on the clock
 
-   always @(posedge clk) begin
+   always @(posedge clk or posedge rst) begin
       if (rst) begin
 
  	 // Reset all Registers.  We lay this out by hand (we could use a
@@ -74,6 +95,8 @@ module RegisterFile (input         clk,
 	 register[13] <= 16'b0;
 	 register[14] <= 16'b0;
 	 register[15] <= 16'b0;
+
+/* -----\/----- EXCLUDED -----\/-----
 	 register[16] <= 16'b0;
 	 register[17] <= 16'b0;
 	 register[18] <= 16'b0;
@@ -122,26 +145,37 @@ module RegisterFile (input         clk,
 	 register[61] <= 16'b0;
 	 register[62] <= 16'b0;
 	 register[63] <= 16'b0;
+ -----/\----- EXCLUDED -----/\----- */
 
       end // if (rst)
 
       else begin
 
-	 // Write any registers which are enabled
+	 if (state == `STATE_HALTED) begin
 
-	 if (rega_we == 1) begin
-	    register[rega_wregnum] <= rega_wdata;
-	 end
+	    // Just write the debug register
 
-	 if (regb_we == 1) begin
-	    register[regb_wregnum] <= regb_wdata;
+	    if (dbg_reg_we == 1) begin
+	       register[dbg_reg_wregnum[3:0]] <= dbg_reg_wdata;
+	    end
 	 end
+	 else begin
 
-	 if (regd_we == 1) begin
-	    register[regd_wregnum] <= regd_wdata;
-	 end
+	    // Write any ordinary registers which are enabled
+
+	    if (rega_we == 1) begin
+	       register[rega_wregnum[3:0]] <= rega_wdata;
+	    end
+
+	    if (regb_we == 1) begin
+	       register[regb_wregnum[3:0]] <= regb_wdata;
+	    end
+
+	    if (regd_we == 1) begin
+	       register[regd_wregnum[3:0]] <= regd_wdata;
+	    end
+	 end // else: !if(debug_active == 1'b1)
       end // else: !if(rst)
-
    end // always @ (posedge clk)
 
 endmodule

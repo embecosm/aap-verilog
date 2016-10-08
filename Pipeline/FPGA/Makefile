@@ -15,13 +15,18 @@
 
 PCF = aap.pcf
 
-SRC = MyStorm.v       \
-      Memory.v        \
-      RegisterFile.v  \
-      Fetch.v         \
-      Execute.v
+SRC = MyStorm.v      \
+      Memory.v       \
+      RegisterFile.v \
+      Fetch.v        \
+      Execute.v      \
+      Uart.v         \
+      UartRx.v       \
+      UartTx.v
 
 HDR = aap.h
+
+EXE_SRC = aap-main.cpp
 
 aap.bin: aap.txt
 	icepack $^ $@
@@ -32,11 +37,22 @@ aap.txt: $(PCF) aap.blif
 aap.blif: $(SRC) $(HDR)
 	yosys -q -p "synth_ice40 -blif $@" $(SRC)
 
-# Verilator model
-.PHONY: verilator
-verilator: $(SRC) $(HDR)
+# Verilator lint
+
+.PHONY: lint
+lint: $(SRC) $(HDR)
 	verilator -Wall --lint-only $(SRC)
+
+# Verilator model. Turn off WIDTH warning, because Verilator gets this wrong
+# (or the standard is wrong) for parameters.
+
+.PHONY: verilator
+verilator: $(SRC) $(HDR) $(EXE_SRC)
+	verilator -Wno-WIDTH --trace --prefix VMyStorm -cc --exe \
+                  $(SRC) $(EXE_SRC)
+	cd obj_dir; make -f VMyStorm.mk
 
 .PHONY: clean
 clean:
 	$(RM) -f aap.blif aap.txt aap.ex aap.bin
+	$(RM) -rf obj_dir
