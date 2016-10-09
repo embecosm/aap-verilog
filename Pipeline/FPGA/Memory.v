@@ -1,4 +1,4 @@
-// Main memory Verilog file
+// Main SRAM memory Verilog file
 
 // Copyright Embecosm 2015, 2016.
 

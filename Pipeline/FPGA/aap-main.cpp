@@ -142,18 +142,22 @@ main (int   argc,
       tfp->dump (main_time);
       main_time += 10;
 
+#ifdef HAVE_SRAM
+
       // Memory handling
 
       if (top->RAM_CS)
-	{
-	  int tmp_data = top->RAM_D;
+      	{
+      	  int tmp_data = top->RAM_D;
 
-	  if (top->RAM_OE)
-	    top->RAM_D = memory[top->RAM_A];
+      	  if (top->RAM_OE)
+      	    top->RAM_D = memory[top->RAM_A];
 
-	  if (top->RAM_WE)
-	    memory[top->RAM_A] = tmp_data;
-	}
+      	  if (top->RAM_WE)
+      	    memory[top->RAM_A] = tmp_data;
+      	}
+
+#endif
     }
 
   tfp->close ();

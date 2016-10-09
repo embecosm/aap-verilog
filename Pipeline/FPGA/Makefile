@@ -17,10 +17,11 @@ PCF = aap.pcf
 
 SRC = MyStorm.v      \
       Memory.v       \
+      MemorySmall.v  \
       RegisterFile.v \
       Fetch.v        \
       Execute.v      \
-      Uart.v         \
+      Debug.v        \
       UartRx.v       \
       UartTx.v
 
@@ -35,7 +36,7 @@ aap.txt: $(PCF) aap.blif
 	arachne-pnr -m 20000 -d 8k -P tq144:4k -p $(PCF) aap.blif -o $@
 
 aap.blif: $(SRC) $(HDR)
-	yosys -q -p "synth_ice40 -blif $@" $(SRC)
+	yosys -q -p "synth_ice40 -blif $@" -p "stat" $(SRC)
 
 # Verilator lint
 
@@ -49,7 +50,7 @@ lint: $(SRC) $(HDR)
 .PHONY: verilator
 verilator: $(SRC) $(HDR) $(EXE_SRC)
 	verilator -Wno-WIDTH --trace --prefix VMyStorm -cc --exe \
-                  $(SRC) $(EXE_SRC)
+                  --top-module MyStorm $(SRC) $(EXE_SRC)
 	cd obj_dir; make -f VMyStorm.mk
 
 .PHONY: clean

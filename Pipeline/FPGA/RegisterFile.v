@@ -57,7 +57,7 @@ module RegisterFile (input         clk,
 
    // Registers
 
-   reg [15:0]  register [15:0];		// Only 16 regs
+   reg [15:0]  register [0:15];
    wire [15:0] reg0 = register[0];	// For debugging
 
    // Read logic
@@ -95,7 +95,6 @@ module RegisterFile (input         clk,
 	 register[13] <= 16'b0;
 	 register[14] <= 16'b0;
 	 register[15] <= 16'b0;
-
 /* -----\/----- EXCLUDED -----\/-----
 	 register[16] <= 16'b0;
 	 register[17] <= 16'b0;
@@ -146,7 +145,6 @@ module RegisterFile (input         clk,
 	 register[62] <= 16'b0;
 	 register[63] <= 16'b0;
  -----/\----- EXCLUDED -----/\----- */
-
       end // if (rst)
 
       else begin

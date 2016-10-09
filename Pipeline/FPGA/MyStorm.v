@@ -112,7 +112,6 @@
 // allows us to use the external SRAM for simulataneous data and instruction
 // access to by clocking it with the master clock.
 
-
 module MyStorm ( input         CLOCK_50, // 50 MHz Clock
                  input 	       RESET, // Posedge reset
 
@@ -121,19 +120,22 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
                  // output [3:0]  LED,      // LED bank
                  // input [2:0]   KEY,      // DIP switches
 
+`ifdef HAVE_SRAM
+		 // Memory (static RAM)
+
+		 output        RAM_CS,
+		 output        RAM_WE,
+		 output        RAM_OE,
+
+		 output [17:0] RAM_A,
+		 inout [15:0]  RAM_D,
+`endif
+
                  // UART
 
                  output        UART_TX,
-                 input 	       UART_RX,
+                 input 	       UART_RX
 
-		 // Memory (static RAM)
-
-		 output        RAM_CS, // Chip select
-		 output        RAM_WE, // Write enable
-		 output        RAM_OE, // Output enable
-
-		 output [17:0] RAM_A, // Address
-		 inout [15:0]  RAM_D     // Data
 		 );
 
    //=======================================================
@@ -210,8 +212,13 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
    wire        dbg_halt_req;		// Request halt
    wire        dbg_halt_ack;		// Indicate we have halted.
 
-   reg [1:0]   clk_phase;
-   wire        clk_slow = ~clk_phase[1];
+   // The clock phase is really 2 bits, but gets into UNOPTFLAT issues with
+   // verilator, so do it this way.
+
+   reg 	       clk_phase_lo;
+   reg 	       clk_phase_hi;
+
+   wire        clk_slow = ~clk_phase_hi;
 
    // Processor state, see above for details
 
@@ -233,33 +240,46 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
 
    // RAM is always accessible
 
+`ifdef HAVE_SRAM
    assign RAM_CS = 1'b1;
+`endif
 
    //=====================================
    //      Slow Clock
    //=====================================
 
-   // Slow clock down by a factor of 4
+   // Slow clock down by a factor of 4.  Do it this way to avoid UNOPTFLAT
+   // loops with verilator
+
    always @(posedge CLOCK_50 or posedge RESET) begin
       if (RESET == 1'b1) begin
-	 clk_phase <= 2'b11;
+	 clk_phase_lo <= 1'b1;
       end
       else begin
          // Increment the counter
-         clk_phase <= clk_phase + 1;
+         clk_phase_lo <= ~clk_phase_lo;
       end
    end
 
-   //=======================================================
-   //              Thunderclap Newman
-   //=======================================================
+   always @(negedge clk_phase_lo or posedge RESET) begin
+      if (RESET == 1'b1) begin
+	 clk_phase_hi <= 1'b1;
+      end
+      else begin
+         // Increment the counter
+         clk_phase_hi <= ~clk_phase_hi;
+      end
+   end
 
    // Instantiate the generic memory. This can read and write one instruction
-   // and one data address in each slow clock cycle.
+   // and one data address in each slow clock cycle. Two variants depending on
+   // whether there is external RAM.
+
+`ifdef HAVE_SRAM
 
    Memory i_Memory (.clk50        (CLOCK_50),
 		    .rst          (RESET),
-		    .clk_phase    (clk_phase),
+		    .clk_phase    ({clk_phase_hi,clk_phase_lo}),
 		    .state        (state),
 		    .ram_addr     (RAM_A),
 		    .ram_data     (RAM_D),
@@ -282,6 +302,32 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
 		    .dbg_i_rdata  (dbg_i_rdata),
 		    .dbg_i_wdata  (dbg_i_wdata),
 		    .dbg_i_we     (dbg_i_we) );
+
+`else // !`ifdef HAVE_SRAM
+
+   MemorySmall i_MemorySmall (.clk50        (CLOCK_50),
+			      .rst          (RESET),
+			      .clk_phase    ({clk_phase_hi,clk_phase_lo}),
+			      .state        (state),
+			      .d_raddr      (d_raddr),
+			      .d_waddr      (d_waddr),
+			      .d_rdata      (d_rdata),
+			      .d_wdata      (d_wdata),
+			      .d_we         (d_we),
+			      .i_raddr      (i_raddr),
+			      .i_rdata      (i_rdata),
+			      .dbg_d_raddr  (dbg_d_raddr),
+			      .dbg_d_waddr  (dbg_d_waddr),
+			      .dbg_d_rdata  (dbg_d_rdata),
+			      .dbg_d_wdata  (dbg_d_wdata),
+			      .dbg_d_we     (dbg_d_we),
+			      .dbg_i_raddr  (dbg_i_raddr),
+			      .dbg_i_waddr  (dbg_i_waddr),
+			      .dbg_i_rdata  (dbg_i_rdata),
+			      .dbg_i_wdata  (dbg_i_wdata),
+			      .dbg_i_we     (dbg_i_we) );
+
+`endif // !`ifdef HAVE_SRAM
 
    // Instantiate the RegisterFile. This can read and write three instructions
    // in each slow clock cycle.
@@ -358,31 +404,34 @@ module MyStorm ( input         CLOCK_50, // 50 MHz Clock
 
    //Instantiate the uart
 
-   Uart i_Uart (.clk              (clk_slow),
-		.rst              (RESET),
-		.uart_tx          (UART_TX),
-		.uart_rx          (UART_RX),
-		.dbg_halt_req     (dbg_halt_req),
-		.dbg_halt_ack     (dbg_halt_ack),
-		.dbg_d_raddr      (dbg_d_raddr),
-		.dbg_d_waddr      (dbg_d_waddr),
-		.dbg_d_rdata      (dbg_d_rdata),
-		.dbg_d_wdata      (dbg_d_wdata),
-		.dbg_d_we         (dbg_d_we),
-		.dbg_i_raddr      (dbg_i_raddr),
-		.dbg_i_waddr      (dbg_i_waddr),
-		.dbg_i_rdata      (dbg_i_rdata),
-		.dbg_i_wdata      (dbg_i_wdata),
-		.dbg_i_we         (dbg_i_we),
-                .dbg_reg_rregnum  (dbg_reg_rregnum),
-                .dbg_reg_wregnum  (dbg_reg_wregnum),
-                .dbg_reg_rdata    (dbg_reg_rdata),
-                .dbg_reg_wdata    (dbg_reg_wdata),
-                .dbg_reg_we       (dbg_reg_we),
-		.dbg_pc_lsw       (dbg_pc_lsw),
-		.dbg_pc_lsw_en	  (dbg_pc_lsw_en),
-		.dbg_st_pc_msb	  (dbg_st_pc_msb),
-		.dbg_st_pc_msb_en (dbg_st_pc_msb_en));
+   Debug i_Debug (.clk              (clk_slow),
+		  .rst              (RESET),
+		  .state            (state),
+		  .uart_tx          (UART_TX),
+		  .uart_rx          (UART_RX),
+		  .dbg_halt_req     (dbg_halt_req),
+		  .dbg_halt_ack     (dbg_halt_ack),
+		  .dbg_d_raddr      (dbg_d_raddr),
+		  .dbg_d_waddr      (dbg_d_waddr),
+		  .dbg_d_rdata      (dbg_d_rdata),
+		  .dbg_d_wdata      (dbg_d_wdata),
+		  .dbg_d_we         (dbg_d_we),
+		  .dbg_i_raddr      (dbg_i_raddr),
+		  .dbg_i_waddr      (dbg_i_waddr),
+		  .dbg_i_rdata      (dbg_i_rdata),
+		  .dbg_i_wdata      (dbg_i_wdata),
+		  .dbg_i_we         (dbg_i_we),
+                  .dbg_reg_rregnum  (dbg_reg_rregnum),
+                  .dbg_reg_wregnum  (dbg_reg_wregnum),
+                  .dbg_reg_rdata    (dbg_reg_rdata),
+                  .dbg_reg_wdata    (dbg_reg_wdata),
+                  .dbg_reg_we       (dbg_reg_we),
+		  .pc               (pc),
+		  .status           (status),
+		  .dbg_pc_lsw       (dbg_pc_lsw),
+		  .dbg_pc_lsw_en    (dbg_pc_lsw_en),
+		  .dbg_st_pc_msb    (dbg_st_pc_msb),
+		  .dbg_st_pc_msb_en (dbg_st_pc_msb_en));
 
    // Update the state machine. Note that there is no state change if debug is
    // active.

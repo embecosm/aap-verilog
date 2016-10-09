@@ -32,11 +32,17 @@
 
 // All values are in network byte order, i.e. big-endian.
 
-module Uart
+module Debug
   #(parameter UART_BAUD = 921600,
               CLK_RATE  = 12500000)
    (input         clk,
     input 	  rst,
+
+    // Processor state
+
+    input [2:0]   state,
+
+    // UART pins
 
     output 	  uart_tx,
     input 	  uart_rx,
@@ -68,6 +74,11 @@ module Uart
     output [15:0] dbg_reg_wdata,
     output 	  dbg_reg_we,
 
+    // PC and carry for reading
+
+    input [23:0]  pc,
+    input [7:0]   status,
+
     // Debug access to write PC and carry
 
     output [15:0] dbg_pc_lsw,
@@ -77,11 +88,13 @@ module Uart
 
    // Constants for debug state
 
-   localparam DS_IDLE    = 4'h0;	// Waiting
-   localparam DS_CMD     = 4'h1;	// Analyze command
-   localparam DS_ARGS    = 4'h2;	// Get args
-   localparam DS_EVAL1   = 4'h3;	// First cycle of evaluation
-   localparam DS_EVAL2   = 4'h4;	// Second cycle of evaluation
+   localparam DS_IDLE    = 3'h0;	// Waiting
+   localparam DS_CMD     = 3'h1;	// Analyze command
+   localparam DS_ARGS    = 3'h2;	// Get args
+   localparam DS_EVAL1   = 3'h3;	// First cycle of evaluation
+   localparam DS_EVAL2   = 3'h4;	// Second cycle of evaluation
+   localparam DS_TX1     = 3'h5;	// First cycle of transmit
+   localparam DS_TX2     = 3'h6;	// Second cycle of transmit
 
    // Register some outputs
 
@@ -107,14 +120,14 @@ module Uart
 
    // Command, data and address for debug
 
-   reg [7:0] 	 dbg_args [5];		// Raw args
+   reg [7:0] 	 dbg_args [0:7];	// Raw args
    reg [2:0] 	 dbg_arg_idx;           // How many args left to get
 
    reg [7:0] 	 dbg_cmd;
 
    // Debugger state
 
-   reg [3:0] 	 dbg_state;
+   reg [2:0] 	 dbg_state;
 
 
    // Map some outputs to particular argument combinations
@@ -251,6 +264,18 @@ module Uart
 
 		end // case: "M"
 
+		"m": begin
+
+		   // Read from data memory. Arg bytes are
+		   // 1: addr MS byte
+		   // 0: addr LS byte
+
+		   dbg_d_raddr <= {dbg_args[1], dbg_args[0]};
+
+		   dbg_state <= DS_EVAL2;
+
+		end // case: "m"
+
 		"N": begin
 
 		   // Write to code memory. Arg bytes are
@@ -266,7 +291,20 @@ module Uart
 
 		   dbg_state <= DS_EVAL2;
 
-		end // case: "M"
+		end // case: "N"
+
+		"n": begin
+
+		   // Read from code memory. Arg bytes are
+		   // 2: addr MS byte
+		   // 1: addr middle byte
+		   // 0: addr LS byte
+
+		   dbg_i_raddr <= {dbg_args[2], dbg_args[1], dbg_args[0]};
+
+		   dbg_state <= DS_EVAL2;
+
+		end // case: "n"
 
 		"R": begin
 
@@ -302,6 +340,40 @@ module Uart
 
 		end // case: "R"
 
+		"r": begin
+
+		   // Read from a register. Reg 64 is PC LSW and 64 is SR/PC MSW
+		   // 0: regnum
+
+		   if (dbg_args[2] < 8'h40) begin
+
+		      // General regs.
+
+		      dbg_reg_rregnum <= dbg_args[0][5:0];
+
+		      dbg_state <= DS_EVAL2;
+		   end
+		   else if (dbg_args[2] == 8'h40) begin
+
+		      // PC LSW. Ready to transmit first byte
+
+		      tx_data  <= pc[15:8];
+		      tx_en    <= 1'b1;
+
+		      dbg_state <= DS_TX1;
+		   end
+		   else if (dbg_args[2] == 8'h41) begin
+
+		      // ST and PC MSB. Ready to transmit first byte
+
+		      tx_data  <= status;
+		      tx_en    <= 1'b1;
+
+		      dbg_state <= DS_TX1;
+		   end
+
+		end // case: "r"
+
 		"c": begin
 
 		   // Continue execution
@@ -322,11 +394,23 @@ module Uart
 
 		end
 
+		"?": begin
+
+		   // Return processor state
+
+		   tx_data  <= {state,5'b0};
+		   tx_en    <= 1'b1;
+
+		   dbg_state <= DS_TX1;
+
+		end
+
 		default: begin
 
 		   // Nothing to do for other commands for now.
 
 		   dbg_state <= DS_IDLE;
+
 		end
 	      endcase // case (dbg_cmd)
 	   end // case: DS_EVAL1
@@ -343,7 +427,15 @@ module Uart
 
 		   dbg_d_we    <= 1'b0;
 		   dbg_state   <= DS_IDLE;
-		 end
+		end
+
+		"m": begin
+
+		   // Transmit byte
+
+		   tx_data <= dbg_d_rdata;
+		   dbg_state <= DS_TX1;
+		end
 
 		"N": begin
 
@@ -353,6 +445,14 @@ module Uart
 		   dbg_state   <= DS_IDLE;
 		 end
 
+		"n": begin
+
+		   // Transmit first byte
+
+		   tx_data <= dbg_i_rdata[15:8];
+		   dbg_state <= DS_TX1;
+		end
+
 		"R": begin
 
 		   // Register write should be complete.
@@ -360,17 +460,152 @@ module Uart
 		   dbg_reg_we       <= 1'b0;
 		   dbg_pc_lsw_en    <= 1'b0;
 		   dbg_st_pc_msb_en <= 1'b0;
+
 		   dbg_state        <= DS_IDLE;
-		 end
+		end
+
+		"r": begin
+
+		   // Read from a register. Reg 64 is PC LSW and 64 is SR/PC
+		   // MSW. However we should not see those here.
+
+		   if (dbg_args[2] < 8'h40) begin
+
+		      // General regs. Transmit first byte
+
+		      tx_data <= dbg_reg_rdata[15:8];
+		      tx_en   <= 1'b1;
+		   end
+
+		   dbg_state <= DS_TX1;
+
+		end // case: "r"
 
 		default: begin
 
-		   // Other commands have nothing left to do
+		   // Other commands have nothing left to do or should never
+		   // be in this state.
 
 		   dbg_state <= DS_IDLE;
 		end
 	      endcase // case (dbg_cmd)
 	   end // case: DS_EVAL2
+
+	   DS_TX1: begin
+
+	      // First cycle of transmission
+
+	      case (dbg_cmd)
+
+		"m": begin
+
+		   // Wait for transmit of byte to ack then complete.
+
+		   if (tx_ack == 1'b1) begin
+		      tx_en <= 1'b0;
+		   end
+
+		   dbg_state <= (tx_done == 1'b1) ? DS_TX1 : DS_IDLE;
+
+		end // case: "m"
+
+		"n": begin
+
+		   // Wait for transmit of first byte to ack then complete,
+		   // then send second byte.
+
+		   if (tx_ack == 1'b1) begin
+		      tx_en <= 1'b0;
+		   end
+
+		   if (tx_done == 1'b1) begin
+
+		      // Send second byte
+
+		      tx_data <= dbg_i_rdata[7:0];
+		      tx_en   <= 1'b1;
+
+		      dbg_state <= DS_TX2;
+
+		   end
+		   else begin
+		      dbg_state <= DS_TX1;	// Stay where we are
+		   end
+		end
+
+		"r": begin
+
+		   // Read from a register. Reg 64 is PC LSW and 64 is SR/PC MSW
+		   // In each case wait for transmit of first byte to ack then
+		   // compete, then send second byte.
+
+		   if (tx_ack == 1'b1) begin
+		      tx_en <= 1'b0;
+		   end
+
+		   if (tx_done == 1'b1) begin
+		      if (dbg_args[2] < 8'h40) begin
+
+		      // General regs. Send second byte
+
+		      tx_data <= dbg_reg_rdata[7:0];
+		      end
+		      else if (dbg_args[2] == 8'h40) begin
+
+			 // PC LSW. Send second byte.
+
+			 tx_data <= pc[7:0];
+		      end
+		      else if (dbg_args[2] == 8'h41) begin
+
+			 // ST and PC MSB. Send second byte.
+
+			 tx_data <= pc[23:16];
+		      end
+
+		      tx_en   <= 1'b1;
+		      dbg_state <= DS_TX2;
+
+		   end
+		end // case: "r"
+
+		default: begin
+
+		   // Other commands have nothing left to do, or should never
+		   // get here.
+
+		   dbg_state <= DS_IDLE;
+		end
+	      endcase // case (dbg_cmd)
+	   end // case: DS_TX1
+
+	   DS_TX2: begin
+
+	      // Second cycle of transmission
+
+	      case (dbg_cmd)
+
+		"n", "r": begin
+
+		   // Wait for second byte to ack then complete.
+
+		   if (tx_ack == 1'b1) begin
+		      tx_en <= 1'b0;
+		   end
+
+		   dbg_state <= (tx_done == 1'b1) ? DS_IDLE : DS_TX2;
+
+		end // case: "n", "r"
+
+		default: begin
+
+		   // Other commands have nothing left to do, or should never
+		   // get here.
+
+		   dbg_state <= DS_IDLE;
+		end
+	      endcase // case (dbg_cmd)
+	   end // case: DS_TX2
 
 	   default: begin
 
