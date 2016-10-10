@@ -1,0 +1,72 @@
+# Archne-pnr PCF file for AAP MyStorm
+
+# Copyright Embecosm 2016.
+
+# Contributor Jeremy Bennett <jeremy.bennett@embecosm.com>
+
+# This file documents the AAP design for FPGA.  It describes Open Hardware and
+# is licensed under the CERN OHL v. 1.2.
+
+# You may redistribute and modify this documentation under the terms of the
+# CERN OHL v.1.2. (http://ohwr.org/cernohl). This documentation is distributed
+# WITHOUT ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING OF MERCHANTABILITY,
+# SATISFACTORY QUALITY AND FITNESS FOR A PARTICULAR PURPOSE. Please see the
+# CERN OHL v.1.2 for applicable conditions
+
+# 50MHz clock
+set_io CLOCK_50 129
+
+# LEDs for output.
+#set_io LED[0] 37
+#set_io LED[1] 38
+#set_io LED[2] 39
+#set_io LED[3] 41
+
+# Switches 1 & 2 (or 0 & 1 depending on numbering) for key
+#set_io KEY[0] 80
+#set_io KEY[1] 64
+
+# UART
+set_io UART_RX 96
+set_io UART_TX 97
+
+# External RAM (256k x 16-bit)
+#set_io RAM_CS 136
+#set_io RAM_OE  45
+#set_io RAM_WE 120
+
+#set_io RAM_A[0]  137
+#set_io RAM_A[1]  138
+#set_io RAM_A[2]  139
+#set_io RAM_A[3]  141
+#set_io RAM_A[4]  142
+#set_io RAM_A[5]   42
+#set_io RAM_A[6]   43
+#set_io RAM_A[7]   44
+#set_io RAM_A[8]   73
+#set_io RAM_A[9]   74
+#set_io RAM_A[10]  75
+#set_io RAM_A[11]  76
+#set_io RAM_A[12] 115
+#set_io RAM_A[13] 116
+#set_io RAM_A[14] 117
+#set_io RAM_A[15] 118
+#set_io RAM_A[16] 119
+#set_io RAM_A[17]  78
+
+#set_io RAM_D[0]  135
+#set_io RAM_D[1]  134
+#set_io RAM_D[2]  130
+#set_io RAM_D[3]  128
+#set_io RAM_D[4]  125
+#set_io RAM_D[5]  124
+#set_io RAM_D[6]  122
+#set_io RAM_D[7]  121
+#set_io RAM_D[8]   91
+#set_io RAM_D[9]   90
+#set_io RAM_D[10]  56
+#set_io RAM_D[11]  55
+#set_io RAM_D[12]  52
+#set_io RAM_D[13]  49
+#set_io RAM_D[14]  48
+#set_io RAM_D[15]  47

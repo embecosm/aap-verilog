@@ -1,0 +1,19 @@
+2016-10-10  Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
+	* .gitignore: Created.
+	* ChangeLog: Created.
+	* README.md: Updated for MyStorm variant.
+	* src/verilog/.gitignore: Created.
+	* src/verilog/Debug.v: Created.
+	* src/verilog/Execute.v: Created.
+	* src/verilog/Fetch.v: Created.
+	* src/verilog/Makefile: Created.
+	* src/verilog/Memory.v: Created.
+	* src/verilog/MemorySmall.v: Created.
+	* src/verilog/MyStorm.v: Created.
+	* src/verilog/RegisterFile.v: Created.
+	* src/verilog/UartRx.v: Created.
+	* src/verilog/UartTx.v: Created.
+	* src/verilog/aap-main.cpp: Created.
+	* src/verilog/aap.h: Created.
+	* src/verilog/aap.pcf: Created.
