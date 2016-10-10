@@ -17,7 +17,7 @@
 
 // Common constants
 
-`include "aap.h"
+`include "aap.vh"
 
 
 // Fetch gets the next instruction. If it is a 16-bit instruction, it will use

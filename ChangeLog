@@ -1,5 +1,17 @@
 2016-10-10  Jeremy Bennett  <jeremy.bennett@embecosm.com>
 
+	* src/verilog/Execute.v: Rename included header to aap.vh.
+	* src/verilog/Fetch.v: Likewise.
+	* src/verilog/Makefile: Remove Verilog model creation to separate dir.
+	* src/verilog/Memory.v: Rename included header to aap.vh.
+	* src/verilog/MemorySmall.v: Likewise.
+	* src/verilog/MyStorm.v: Likewise.
+	* src/verilog/RegisterFile.v: Likewise.
+	* src/verilog/aap-main.cpp: Deleted.
+	* src/verilog/aap.vh: Renamed from aap.h
+
+2016-10-10  Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
 	* .gitignore: Created.
 	* ChangeLog: Created.
 	* README.md: Updated for MyStorm variant.

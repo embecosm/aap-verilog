@@ -17,7 +17,7 @@
 
 // Common constants
 
-`include "aap.h"
+`include "aap.vh"
 
 
 // This is a very simple implementation.  The main logic is clocked at

@@ -15,7 +15,7 @@
 // PURPOSE. Please see the CERN OHL v.1.2 for applicable conditions
 
 
-`include "aap.h"
+`include "aap.vh"
 
 
 // Read 3 regs and the carry bit and write 3 regs and the carry bit each cycle

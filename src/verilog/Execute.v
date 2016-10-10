@@ -17,7 +17,7 @@
 
 // Common constants
 
-`include "aap.h"
+`include "aap.vh"
 
 
 // This module executes instructions

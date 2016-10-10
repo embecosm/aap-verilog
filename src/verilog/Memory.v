@@ -37,7 +37,7 @@
 // - posedge 3 - latch read instr data, write en and set write instr address &
 //               data
 
-`include "aap.h"
+`include "aap.vh"
 
 module Memory (input         clk50,
 	       input 	     rst,
