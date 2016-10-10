@@ -1,4 +1,0 @@
-
-State Machine - |DE0_NANO|uart:i_uart|saved
-Name 
-saved.101010 
